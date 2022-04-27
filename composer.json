@@ -1,0 +1,16 @@
+{
+    "name": "rafa/footage-organiser",
+    "description": "Simple script to organise your video footage by date taken",
+    "autoload": {
+        "psr-4": {
+            "Rafa\\FootageOrganiser\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Rafael García Doblas",
+            "email": "rafamalaga86@gmail.com"
+        }
+    ],
+    "require": {}
+}

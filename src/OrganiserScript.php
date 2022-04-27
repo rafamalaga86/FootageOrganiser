@@ -77,7 +77,7 @@ class OrganiserScript {
                 'file' => $file,
                 'creation_time' => $creation_time,
                 'data_source' => $data_source,
-                'dir' => $dir . '/' . $creation_time . '/' . $file
+                'absolute' => $dir . '/' . $creation_time . '/' . $file
             ];
         }
 
@@ -94,10 +94,10 @@ class OrganiserScript {
                     CommandLine::printYellow($file_moving['creation_time']);
             }
 
-            echo ' -> ' . $file_moving['dir'];
+            echo ' -> ' . $file_moving['absolute'];
             echo PHP_EOL;
 
-            if (file_exists($file_moving['dir'])) {
+            if (file_exists($file_moving['absolute'])) {
                 CommandLine::printRed('File already exists in the destiny' . PHP_EOL);
                 $abort = true;
             }
@@ -128,17 +128,17 @@ class OrganiserScript {
         $fails = [];
         foreach ($file_moving_list as $file_moving) {
             // Destiny dir exists? Create it
-            if (!is_dir(dirname($file_moving['dir']))) {
-                mkdir(dirname($file_moving['dir']), 0755, true);
+            if (!is_dir(dirname($file_moving['absolute']))) {
+                mkdir(dirname($file_moving['absolute']), 0755, true);
             }
 
-            echo $file_moving['file'] . ' -> ' . $file_moving['dir'] . PHP_EOL;
+            echo $file_moving['file'] . ' -> ' . $file_moving['absolute'] . PHP_EOL;
 
-            if (file_exists($file_moving['dir'])) {
+            if (file_exists($file_moving['absolute'])) {
                 CommandLine::printRed('File already exists in the destiny' . PHP_EOL);
                 $was_successful = false;
             } else {
-                $was_successful = copy($file_moving['file'], $file_moving['dir']);
+                $was_successful = copy($file_moving['file'], $file_moving['absolute']);
             }
 
             if ($was_successful) {
