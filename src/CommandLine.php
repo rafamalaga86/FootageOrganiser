@@ -20,12 +20,16 @@ class CommandLine {
 
     static public function printList(array $array): void
     {
-        foreach ($array as $item) {
-            if (is_string($item)) {
-                echo $item . PHP_EOL;
+        foreach ($array as $key => $item) {
+            if (!is_array($item)) {
+                if (is_string($key)) {
+                    echo ucfirst($key) . ': ';
+                }
+                echo $item . '  ';
             } elseif (is_array($item)) {
-                print_list($item);
+                self::printList($item);
             }
         }
+        echo PHP_EOL;
     }
 }

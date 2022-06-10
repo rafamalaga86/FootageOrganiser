@@ -58,7 +58,7 @@ class FileManagement {
         }
 
         $btime = trim(fread($handle, 100));
-        $date_string = strftime("%Y-%m-%d", $btime);
+        $date_string = date("Y-m-d", $btime);
         pclose($handle);
 
         return $date_string;
@@ -84,17 +84,21 @@ class FileManagement {
     }
 
 
-    static public function scandirTree(string $dir): array
+    static public function scandirTree(string $dir = null): array
     {
-        $list = self::scandirFiltered($dir);
+        $list = [];
+        $list_level = self::scandirFiltered($dir ?? '.');
+
+        if ($dir !== null) {
+            foreach ($list_level as $item) {
+                $list[] = $dir . '/' . $item;
+            }
+        }
 
         $result_list = [];
         foreach ($list as $item) {
             if (is_dir($item)) {
                 $returned_list = self::scandirTree($item);
-                foreach ($returned_list as &$returned_item) {
-                    $returned_item = $item . '/' . $returned_item;
-                }
                 $result_list = array_merge($result_list, $returned_list);
             } else {
                 $result_list[] = $item;
@@ -102,5 +106,14 @@ class FileManagement {
         }
 
         return $result_list;
+    }
+
+    static public function trimFirstDot(string $string): string
+    {
+        if ( $string[0] === '.' && $string[1] === '/') {
+            return substr($string, 2);
+        }
+
+        return $string;
     }
 }
