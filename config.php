@@ -12,7 +12,7 @@ function min_sizes()
     ];
 }
 
-function exceptions()
+function exceptions(): array
 {
     return [
         './2021-12-01/Mobile/VID_20211201_135934.mp4',
@@ -21,7 +21,7 @@ function exceptions()
     ];
 }
 
-function organiserScriptIgnores()
+function organiserScriptIgnores(): array
 {
     return [
         'fileinfo_list.list',
@@ -33,6 +33,8 @@ function organiserScriptIgnores()
 function routeReplacement()
 {
     return  [
-        '/Insta360GO2/DCIM/Camera01/' => '/Insta360GO2/DCIM/Go2/'
+        '/^.*\/256-2\/DCIM\/Camera01\/.*$/' => ['Camera01', 'OneX2'],
+        '/^.*\/Insta360GO2\/DCIM\/Camera01\/.*$/' => ['Camera01', 'Go2-NotRendered'],
+        '/^.*\/100GOPRO\/.*$/' => ['100GOPRO', 'GoPro'],
     ];
 }

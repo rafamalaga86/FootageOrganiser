@@ -24,7 +24,7 @@ class FileManagement {
         }
 
         if (!$result[0]) {
-            throw new Exception('Could not find the creation time of file ' . $file . PHP_EOL);
+            throw new Exception('Could not find the creation time of file ' . $file);
         }
 
         return $result;

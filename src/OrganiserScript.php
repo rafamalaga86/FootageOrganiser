@@ -2,6 +2,7 @@
 
 namespace RafaMalaga86\FootageOrganiser;
 
+
 use Exception;
 
 class OrganiserScript
@@ -58,30 +59,86 @@ class OrganiserScript
         }
 
         $file_list = FileManagement::scandirTree('.');
-        self::organise($file_list, $main_dir);
-
+        $replacements = self::getReplacements($file_list, $organise_dir);
+        self::organise($file_list, $main_dir, $replacements);
         exit(0);
     }
 
-    protected static function organise($file_list, $dir): void
+    protected static function getReplacements(array $file_list, string $organise_dir): array
+    {
+        $replacements = [];
+        foreach ($file_list as $file) {
+            foreach (routeReplacement() as $regExp => $replacement) {
+                $it_matches = preg_match($regExp, realpath($file));
+                if ($it_matches && !in_array($replacement, $replacements)) {
+                    $replacements[] = $replacement;
+                }
+            }
+        }
+
+        return $replacements;
+    }
+
+    protected static function organise($file_list, $dir, $replacements = null): void
     {
         $total_bits = 0;
+        $camera = null;
         $file_moving_list = [];
+        $dir_existing = [];
+        $dir_created = [];
+
         foreach ($file_list as $file) {
+            // Is this file meant to be ignored?
+            $file_exploded = explode('/', $file);
+            $file_name = end($file_exploded);
+            if (in_array($file_name, organiserScriptIgnores())) {
+                continue;
+            }
+
             try {
                 list($creation_time, $data_source) = FileManagement::getFileCreationDate($file);
             } catch (Exception $e) {
-                CommandLine::printRed($e->getMessage());
+                CommandLine::printRed($e->getMessage() . PHP_EOL);
                 exit(1);
             }
 
+            $file_destiny = $file;
+            if ($replacements) {
+                foreach ($replacements as $replace) {
+                    $search = $replace[0];
+                    $replacement = $replace[1];
+                    $file_destiny = str_replace($search, $replacement, $file);
+                    $camera = $replacement;
+                }
+            }
+
             $total_bits += filesize($file);
+
+
+
+            try {
+                $dir_found = self::findDir($dir, $creation_time);
+            } catch (Exception $e) {
+                CommandLine::printRed($e->getMessage() . PHP_EOL);
+                exit(1);
+            }
+            // $dir_exists = file_exists($dir . '/' . $file['creation_time']);
+
+            $date_dir = $dir_found ? $dir_found : $creation_time;
+
+            // Count them to show final results
+            if (!$dir_found && !in_array($date_dir, $dir_created)) {
+                $dir_created[] = $date_dir;
+            } elseif ($dir_found && !in_array($date_dir, $dir_existing)) {
+                $dir_existing[] = $date_dir;
+            }
+
             $file_moving_list[] = [
                 'file' => $file,
                 'filesize' => filesize($file),
                 'creation_time' => $creation_time,
                 'data_source' => $data_source,
-                'absolute_destiny' => $dir . '/' . $creation_time . '/' . FileManagement::trimFirstDot($file),
+                'absolute_destiny' => $dir . '/' . $date_dir . '/' . FileManagement::trimFirstDot($file_destiny),
             ];
         }
 
@@ -89,18 +146,6 @@ class OrganiserScript
         usort($file_moving_list, function ($a, $b) {
             return $a['creation_time'] > $b['creation_time'];
         });
-
-        // Check which directories exists already
-        $dir_existing = [];
-        $dir_created = [];
-        foreach ($file_moving_list as $file) {
-            $dir_exists = file_exists($dir . '/' . $file['creation_time']);
-            if (!$dir_exists && !in_array($file['creation_time'], $dir_created)) {
-                $dir_created[] = $file['creation_time'];
-            } elseif ($dir_exists && !in_array($file['creation_time'], $dir_existing)) {
-                $dir_existing[] = $file['creation_time'];
-            }
-        }
 
         $abort = false;
         // Print the array of files and dates and check it won't override
@@ -157,7 +202,7 @@ class OrganiserScript
         }
 
 
-        echo PHP_EOL . 'Starting to move....' . PHP_EOL;
+        echo PHP_EOL . 'Starting to copy....' . PHP_EOL;
         echo '====================' . PHP_EOL;
         // Move all the files
         $count = 0;
@@ -177,9 +222,8 @@ class OrganiserScript
                 CommandLine::printRed('File already exists in the destiny.' . PHP_EOL);
                 $was_successful = false;
             } else {
-                $bar_length = self::printProgression($percentage);
+                $bar_length = self::printProgression($percentage, $camera);
                 $was_successful = copy($file_moving['file'], $file_moving['absolute_destiny']);
-                sleep(3);
                 self::deleteProgression($bar_length);
             }
 
@@ -200,14 +244,14 @@ class OrganiserScript
         }
     }
 
-    protected static function printProgression(int $percentage)
+    protected static function printProgression(int $percentage, string $camera = null)
     {
         $percentage29 = round($percentage / 100 * 29);
+        // '|===================>          | 72%';
 
-        $drawing = '|===================>          | 72%';
-
-        $bar = '|' . str_repeat('=', $percentage29) . '>';
-        $drawing = str_pad($bar, 30, ' ', STR_PAD_RIGHT) . '| ' . $percentage . '%';
+        $bar = '|' . str_repeat('#', $percentage29) . '>';
+        $draw_percentage =  str_pad($percentage . '%', 4, ' ', STR_PAD_LEFT);
+        $drawing = $draw_percentage . ' ' . str_pad($bar, 30, ' ', STR_PAD_RIGHT) . '| ' . $camera . ' ';
         CommandLine::printGreen($drawing);
 
         return strlen($drawing);
@@ -216,5 +260,24 @@ class OrganiserScript
     protected static function deleteProgression(int $bar_length = 0)
     {
         echo "\033[" . $bar_length . "D";      // Move 5 characters backward
+    }
+
+    protected static function findDir(string $dir_name, string $creation_date): ?string
+    {
+        $founds = [];
+        $file_list = scandir($dir_name);
+
+        foreach ($file_list as $file) {
+            // Check if the dir contains the date
+            if (strpos($file, $creation_date) !== false && is_dir($dir_name . '/' . $file)) {
+                $founds[] = $file;
+            }
+        }
+
+        if (count($founds) > 1) {
+            throw new Exception('Error: More than one directory matched the file creation date: ' . implode(', ', $founds));
+        }
+
+        return $founds ? $founds[0] : null;
     }
 }
