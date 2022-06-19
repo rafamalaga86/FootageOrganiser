@@ -5,17 +5,16 @@ namespace RafaMalaga86\FootageOrganiser;
 use DateTime;
 use Exception;
 
-class FileManagement {
-
-    const FILTER_OUT_REGEXPS = [
+class FileManagement
+{
+    protected const FILTER_OUT_REGEXPS = [
         '/^\.$/',
         '/^\.\.$/',
         '/^\.DS_Store$/',
         '/^\._.*$/',
     ];
 
-
-    static public function getFileCreationDate(string $file): array
+    public static function getFileCreationDate(string $file): array
     {
         $result = [self::getCreationDateFromTitleYYYYMMDD($file), 'title'];
 
@@ -24,14 +23,24 @@ class FileManagement {
         }
 
         if (!$result[0]) {
+            throw new Exception('Could not find the creation date of file ' . $file);
+        }
+
+        return $result;
+    }
+
+    public static function getFileCreationTime(string $file): string
+    {
+        $result = self::getFileCreationTimeFromMeta($file);
+
+        if (!$result) {
             throw new Exception('Could not find the creation time of file ' . $file);
         }
 
         return $result;
     }
 
-
-    static public function getCreationDateFromTitleYYYYMMDD(string $file):? string
+    public static function getCreationDateFromTitleYYYYMMDD(string $file): ?string
     {
         $regexp = '/(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])/';
         $matches = [];
@@ -49,8 +58,7 @@ class FileManagement {
         return $result;
     }
 
-
-    static public function getFileCreationDateFromMeta(string $file):? string
+    public static function getFileCreationDateFromMeta(string $file): ?string
     {
         $handle = popen('stat -f %B ' . escapeshellarg($file), 'r');
         if (!$handle) {
@@ -64,8 +72,22 @@ class FileManagement {
         return $date_string;
     }
 
+    public static function getFileCreationTimeFromMeta(string $file): ?string
+    {
+        $handle = popen('stat -f %B ' . escapeshellarg($file), 'r');
+        if (!$handle) {
+            return null;
+        }
 
-    static protected function scandirFiltered(string $dir): array
+        $btime = trim(fread($handle, 100));
+        $time_string = date("His", $btime);
+        pclose($handle);
+
+        return $time_string;
+    }
+
+
+    protected static function scandirFiltered(string $dir): array
     {
         $list = scandir($dir);
 
@@ -84,7 +106,7 @@ class FileManagement {
     }
 
 
-    static public function scandirTree(string $dir = null): array
+    public static function scandirTree(string $dir = null): array
     {
         $list = [];
         $list_level = self::scandirFiltered($dir ?? '.');
@@ -108,9 +130,9 @@ class FileManagement {
         return $result_list;
     }
 
-    static public function trimFirstDot(string $string): string
+    public static function trimFirstDot(string $string): string
     {
-        if ( $string[0] === '.' && $string[1] === '/') {
+        if ($string[0] === '.' && $string[1] === '/') {
             return substr($string, 2);
         }
 

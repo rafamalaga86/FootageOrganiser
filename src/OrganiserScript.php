@@ -16,16 +16,6 @@ class OrganiserScript
         unset($argv[0]);
         $argv = array_values($argv);
 
-        // // For option --test
-        // $is_test = false;
-        // $option_position = array_search('--test', $argv);
-        // if ($option_position) {
-        //     $is_test = true;
-
-        //     unset($argv[$option_position]);
-        //     $argv = array_values($argv);
-        // }
-
         $main_dir = $argv[0] ?? null;
         $organise_dir = $argv[1] ?? null;
 
@@ -96,7 +86,7 @@ class OrganiserScript
             }
 
             try {
-                list($creation_time, $data_source) = FileManagement::getFileCreationDate($file);
+                list($creation_date, $data_source) = FileManagement::getFileCreationDate($file);
             } catch (Exception $e) {
                 CommandLine::printRed($e->getMessage() . PHP_EOL);
                 exit(1);
@@ -117,14 +107,14 @@ class OrganiserScript
 
 
             try {
-                $dir_found = self::findDir($dir, $creation_time);
+                $dir_found = self::findDir($dir, $creation_date);
             } catch (Exception $e) {
                 CommandLine::printRed($e->getMessage() . PHP_EOL);
                 exit(1);
             }
-            // $dir_exists = file_exists($dir . '/' . $file['creation_time']);
+            // $dir_exists = file_exists($dir . '/' . $file['creation_date']);
 
-            $date_dir = $dir_found ? $dir_found : $creation_time;
+            $date_dir = $dir_found ? $dir_found : $creation_date;
 
             // Count them to show final results
             if (!$dir_found && !in_array($date_dir, $dir_created)) {
@@ -136,7 +126,7 @@ class OrganiserScript
             $file_moving_list[] = [
                 'file' => $file,
                 'filesize' => filesize($file),
-                'creation_time' => $creation_time,
+                'creation_date' => $creation_date,
                 'data_source' => $data_source,
                 'absolute_destiny' => $dir . '/' . $date_dir . '/' . FileManagement::trimFirstDot($file_destiny),
             ];
@@ -144,7 +134,7 @@ class OrganiserScript
 
         // Order by creation time
         usort($file_moving_list, function ($a, $b) {
-            return $a['creation_time'] > $b['creation_time'];
+            return $a['creation_date'] > $b['creation_date'];
         });
 
         $abort = false;
@@ -154,10 +144,10 @@ class OrganiserScript
 
             switch ($file_moving['data_source']) {
                 case 'title':
-                    CommandLine::printGreen($file_moving['creation_time']);
+                    CommandLine::printGreen($file_moving['creation_date']);
                     break;
                 case 'meta':
-                    CommandLine::printYellow($file_moving['creation_time']);
+                    CommandLine::printYellow($file_moving['creation_date']);
             }
 
             echo ' -> ' . $file_moving['absolute_destiny'];
