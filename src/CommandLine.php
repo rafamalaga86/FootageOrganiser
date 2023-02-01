@@ -32,4 +32,18 @@ class CommandLine {
         }
         echo PHP_EOL;
     }
+
+    static public function confirmOrAbort(): void
+    {
+        echo PHP_EOL;
+        echo 'Are you sure you want to do this? (y/n):';
+        $handle = fopen('php://stdin', 'r');
+        $response = strtolower(trim(fgets($handle)));
+        fclose($handle);
+
+        if ($response != 'y' && $response != 'yes'){
+            CommandLine::printRed('Aborting.' . PHP_EOL);
+            exit(0);
+        }
+    }
 }

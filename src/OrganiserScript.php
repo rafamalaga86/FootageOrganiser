@@ -2,7 +2,6 @@
 
 namespace RafaMalaga86\FootageOrganiser;
 
-
 use Exception;
 
 class OrganiserScript
@@ -179,18 +178,8 @@ class OrganiserScript
             CommandLine::printGreen(implode(', ', $dir_created) . PHP_EOL);
         }
 
-        // Start with the moving if confirm
-        echo PHP_EOL;
-        echo 'Are you sure you want to do this? (y/n):';
-        $handle = fopen('php://stdin', 'r');
-        $response = strtolower(trim(fgets($handle)));
-        fclose($handle);
-
-        if ($response != 'y' && $response != 'yes'){
-            CommandLine::printRed('Aborting.' . PHP_EOL);
-            exit(0);
-        }
-
+        CommandLine::confirmOrAbort();
+        // If arrives here, is confirmed
 
         echo PHP_EOL . 'Starting to copy....' . PHP_EOL;
         echo '====================' . PHP_EOL;

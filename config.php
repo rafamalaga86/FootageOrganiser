@@ -33,8 +33,19 @@ function organiserScriptIgnores(): array
 function routeReplacement()
 {
     return  [
-        '/^.*\/256-2\/DCIM\/Camera01\/.*$/' => ['Camera01', 'OneX2'],
+        '/^.*\/256-3\/DCIM\/Camera01\/.*$/' => ['Camera01', 'OneX2'],
         '/^.*\/Insta360GO2\/DCIM\/Camera01\/.*$/' => ['Camera01', 'Go2-NotRendered'],
         '/^.*\/100GOPRO\/.*$/' => ['100GOPRO', 'GoPro'],
+    ];
+}
+
+function prefixesByExtension()
+{
+    return [
+        'mp4' => 'VID',
+        'mov' => 'VID',
+        'lrv' => 'VID',
+        'jpg' => 'IMG',
+        'jpeg' => 'IMG',
     ];
 }

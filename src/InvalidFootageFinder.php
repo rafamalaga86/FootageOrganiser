@@ -2,8 +2,6 @@
 
 namespace RafaMalaga86\FootageOrganiser;
 
-use Exception;
-
 class InvalidFootageFinder {
     public static function run (array $argv)
     {
@@ -63,8 +61,8 @@ class InvalidFootageFinder {
         }
 
         $list_filtered = array_filter($file_list_size, function ($item) {
-            $ext = strtolower(pathinfo($item['file'], PATHINFO_EXTENSION));
-            $min_size = min_sizes()[$ext] ?? min_sizes()['default'];
+            $extension = FileManagement::getFileExtension($item['file']);
+            $min_size = min_sizes()[$extension] ?? min_sizes()['default'];
             if ($item['size'] < 1024 * 1024 * $min_size) {// 1 MB
                 return true;
             }

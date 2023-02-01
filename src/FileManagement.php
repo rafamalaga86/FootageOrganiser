@@ -14,9 +14,15 @@ class FileManagement
         '/^\._.*$/',
     ];
 
+    public static function getFileExtension(string $filepath): string
+    {
+        return strtolower(pathinfo($filepath, PATHINFO_EXTENSION));
+    }
+
     public static function getFileCreationDate(string $file): array
     {
-        $result = [self::getCreationDateFromTitleYYYYMMDD($file), 'title'];
+        $filename = basename($file);
+        $result = [self::getCreationDateFromTitleYYYYMMDD($filename), 'title'];
 
         if (!$result[0]) {
             $result = [self::getFileCreationDateFromMeta($file), 'meta'];
@@ -29,9 +35,9 @@ class FileManagement
         return $result;
     }
 
-    public static function getFileCreationTime(string $file): string
+    public static function getFileCreationTime(string $file, $format = 'His'): string
     {
-        $result = self::getFileCreationTimeFromMeta($file);
+        $result = self::getFileCreationTimeFromMeta($file, $format);
 
         if (!$result) {
             throw new Exception('Could not find the creation time of file ' . $file);
@@ -40,9 +46,27 @@ class FileManagement
         return $result;
     }
 
+    public static function hasCreationDateFromTitleYYYYMMDD(string $file): bool
+    {
+        try {
+            $filename = basename($file);
+            $title = self::getCreationDateFromTitleYYYYMMDD($filename);
+        } catch (MultipleDatesException $exception) {
+            return true; // It has more than one date in the title
+        }
+
+        return (bool) $title;
+    }
+
     public static function getCreationDateFromTitleYYYYMMDD(string $file): ?string
     {
-        $regexp = '/(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])/';
+        $regexp = '/(20\d{2})-?(0[1-9]|1[0-2])-?(0[1-9]|[12][0-9]|3[01])/';
+
+        return self::getCreationDateFromTitle($regexp, $file);
+    }
+
+    public static function getCreationDateFromTitle(string $regexp, string $file): ?string
+    {
         $matches = [];
         preg_match_all($regexp, $file, $matches);
 
@@ -50,12 +74,18 @@ class FileManagement
             return null;
         }
         if (count($matches[0]) > 1) {
-            throw new Exception('The file ' . $file . ' has two ore more valid dates in its title' . PHP_EOL);
+            throw new MultipleDatesException('The file ' . $file . ' has two ore more valid dates in its title: ' . PHP_EOL . implode(PHP_EOL, $matches[0]) . PHP_EOL);
         }
 
-        $result = DateTime::createFromFormat('Ymd', $matches[0][0])->format('Y-m-d');
+        $datetime = DateTime::createFromFormat('Ymd', $matches[0][0]);
+        if (!$datetime) { // Previous failed, try with dashes
+            $datetime = DateTime::createFromFormat('Y-m-d', $matches[0][0]);
+        }
+        if (!$datetime) { // Previous failed, try with dashes
+            throw new Exception('Couln\'t get date from the title. ' . PHP_EOL);
+        }
 
-        return $result;
+        return $datetime->format('Y-m-d');
     }
 
     public static function getFileCreationDateFromMeta(string $file): ?string
@@ -72,7 +102,7 @@ class FileManagement
         return $date_string;
     }
 
-    public static function getFileCreationTimeFromMeta(string $file): ?string
+    public static function getFileCreationTimeFromMeta(string $file, string $format = 'His'): ?string
     {
         $handle = popen('stat -f %B ' . escapeshellarg($file), 'r');
         if (!$handle) {
@@ -80,7 +110,7 @@ class FileManagement
         }
 
         $btime = trim(fread($handle, 100));
-        $time_string = date("His", $btime);
+        $time_string = date($format, $btime);
         pclose($handle);
 
         return $time_string;
