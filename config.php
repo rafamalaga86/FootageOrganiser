@@ -33,9 +33,10 @@ function organiserScriptIgnores(): array
 function routeReplacement()
 {
     return  [
-        '/^.*\/256-3\/DCIM\/Camera01\/.*$/' => ['Camera01', 'OneX2'],
+        '/^.*\/OneX2\/DCIM\/Camera01\/.*$/' => ['Camera01', 'OneX2'],
         '/^.*\/Insta360GO2\/DCIM\/Camera01\/.*$/' => ['Camera01', 'Go2-NotRendered'],
-        '/^.*\/100GOPRO\/.*$/' => ['100GOPRO', 'GoPro'],
+        '/^.*\/GoPro11\/DCIM\/100GOPRO\/.*$/' => ['100GOPRO', 'GoPro11'],
+        '/^.*\/GoPro9\/DCIM\/100GOPRO\/.*$/' => ['100GOPRO', 'GoPro9'],
     ];
 }
 
@@ -47,5 +48,13 @@ function prefixesByExtension()
         'lrv' => 'VID',
         'jpg' => 'IMG',
         'jpeg' => 'IMG',
+    ];
+}
+
+function validCamerasAndPaths()
+{
+    return [
+        'GoPro9' => '/Volumes/GoPro9/DCIM/ ',
+        'GoPro11' => '/Volumes/GoPro11/DCIM/ ',
     ];
 }

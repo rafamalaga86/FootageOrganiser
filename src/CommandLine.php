@@ -2,23 +2,24 @@
 
 namespace RafaMalaga86\FootageOrganiser;
 
-class CommandLine {
-    static public function printYellow(string $string): void
+class CommandLine
+{
+    public static function printYellow(string $string): void
     {
         echo "\e[0;33m" . $string . "\e[0m";
     }
 
-    static public function printGreen(string $string): void
+    public static function printGreen(string $string): void
     {
         echo "\e[0;32m" . $string . "\e[0m";
     }
 
-    static public function printRed(string $string): void
+    public static function printRed(string $string): void
     {
         echo "\e[0;31m" . $string . "\e[0m";
     }
 
-    static public function printList(array $array): void
+    public static function printList(array $array): void
     {
         foreach ($array as $key => $item) {
             if (!is_array($item)) {
@@ -33,7 +34,7 @@ class CommandLine {
         echo PHP_EOL;
     }
 
-    static public function confirmOrAbort(): void
+    public static function confirmOrAbort(): void
     {
         echo PHP_EOL;
         echo 'Are you sure you want to do this? (y/n):';

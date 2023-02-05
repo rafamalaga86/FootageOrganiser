@@ -51,7 +51,7 @@ class InvalidFootageFinder {
     protected static function listSmallSize($file_list): void
     {
         $file_list_size = [];
-        foreach($file_list as $file) {
+        foreach ($file_list as $file) {
             if (!in_array($file, exceptions()) && !is_link($file)) {
                 $file_list_size[] = [
                     'file' => $file,
