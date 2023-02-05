@@ -2,7 +2,8 @@
 
 namespace RafaMalaga86\FootageOrganiser;
 
-class InvalidFootageFinder {
+class InvalidFootageFinder
+{
     public static function run (array $argv)
     {
         echo 'INVALID FOOTAGE FINDER' . PHP_EOL;
@@ -25,27 +26,23 @@ class InvalidFootageFinder {
         $dir = $argv[0] ?? null;
 
         if (!$dir) {
-            CommandLine::printRed('The directory argument is missing.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('The directory argument is missing.');
         }
 
         $dir = realpath($dir);
 
         if (!is_dir($dir)) {
-            CommandLine::printRed('Could not locate the directory argument.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('Could not locate the directory argument.');
         }
 
         $could_change_dir = chdir($dir);
 
         if (!$could_change_dir) {
-            CommandLine::printRed('Could not change dir.' . PHP_EOL);
+            throw new Exit1Exception('Could not change dir.');
         }
 
         $file_list = FileManagement::scandirTree('.');
         self::listSmallSize($file_list);
-
-        exit(0);
     }
 
     protected static function listSmallSize($file_list): void
@@ -69,8 +66,8 @@ class InvalidFootageFinder {
         });
 
         if (!$list_filtered) {
-            CommandLine::printGreen('NO POTENTIAL INVALID FILES!!' . PHP_EOL);
-            exit(0);
+            CommandLine::printGreen('NO POTENTIAL INVALID FILES!' . PHP_EOL);
+            return;
         }
 
         foreach ($list_filtered as $item) {
@@ -81,5 +78,5 @@ class InvalidFootageFinder {
 
         echo PHP_EOL;
         CommandLine::printGreen('SCRIPT ENDED SUCCESSFULLY' . PHP_EOL);
-}
     }
+}

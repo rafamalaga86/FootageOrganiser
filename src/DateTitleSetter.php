@@ -20,27 +20,31 @@ class DateTitleSetter
         $dir = $argv[0] ?? null;
 
         if (!$dir) {
-            CommandLine::printRed('The directory argument is missing.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('The directory argument is missing.');
         }
 
         $dir = realpath($dir);
 
         if (!is_dir($dir)) {
-            CommandLine::printRed('Could not locate the directory argument.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('Could not locate the directory argument.');
         }
 
         $could_change_dir = chdir($dir);
 
         if (!$could_change_dir) {
-            CommandLine::printRed('Could not change dir.' . PHP_EOL);
+            throw new Exit1Exception('Could not change dir.');
         }
 
         $file_list = FileManagement::scandirTree('.');
 
         $filtered_list = [];
         foreach ($file_list as $file) {
+            $filename = basename($file);
+
+            if (in_array($filename, fileIgnores())) {
+                continue;
+            }
+
             // We have to filter out the ones with title already in the name
             if (FileManagement::hasCreationDateFromTitleYYYYMMDD($file)) {
                 continue;
@@ -49,12 +53,10 @@ class DateTitleSetter
             try {
                 list($creation_date, $data_source_date) = FileManagement::getFileCreationDate($file);
                 $creation_time = FileManagement::getFileCreationTime($file);
-            } catch (Exception $e) {
-                CommandLine::printRed($e->getMessage() . PHP_EOL);
-                exit(1);
+            } catch (Exception $exception) {
+                throw new Exit1Exception($exception->getMessage());
             }
 
-            $filename = basename($file);
             $ext = FileManagement::getFileExtension($file);
 
             $prefix = self::getPrefix($ext) ? self::getPrefix($ext) . '_' : '';
@@ -77,9 +79,7 @@ class DateTitleSetter
         }
 
         if (!$filtered_list) {
-            CommandLine::printRed('There is no files to be renamed.');
-            echo PHP_EOL;
-            exit(1);
+            throw new Exit1Exception('There is no files to be renamed.');
         }
 
         CommandLine::confirmOrAbort();
@@ -94,13 +94,11 @@ class DateTitleSetter
             $was_renamed = rename($file, $new_file);
 
             if (!$was_renamed) {
-                CommandLine::printRed('File could not be renamed.');
-                exit(1);
+                throw new Exit1Exception('File could not be renamed.');
             }
         }
 
         CommandLine::printGreen('Done.' . PHP_EOL);
-        exit(0);
     }
 
     protected static function addExtensionNotFound(string $extension)

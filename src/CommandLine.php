@@ -42,7 +42,7 @@ class CommandLine
         $response = strtolower(trim(fgets($handle)));
         fclose($handle);
 
-        if ($response != 'y' && $response != 'yes'){
+        if ($response != 'y' && $response != 'yes') {
             CommandLine::printRed('Aborting.' . PHP_EOL);
             exit(0);
         }

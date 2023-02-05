@@ -35,7 +35,7 @@ class FileManagement
         return $result;
     }
 
-    public static function getFileCreationTime(string $file, $format = 'His'): string
+    public static function getFileCreationTime(string $file, $format = 'H;i;s'): string
     {
         $result = self::getFileCreationTimeFromMeta($file, $format);
 
@@ -102,7 +102,7 @@ class FileManagement
         return $date_string;
     }
 
-    public static function getFileCreationTimeFromMeta(string $file, string $format = 'His'): ?string
+    public static function getFileCreationTimeFromMeta(string $file, string $format = 'H;i;s'): ?string
     {
         $handle = popen('stat -f %B ' . escapeshellarg($file), 'r');
         if (!$handle) {

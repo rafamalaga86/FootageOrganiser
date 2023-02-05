@@ -2,8 +2,6 @@
 
 namespace RafaMalaga86\FootageOrganiser;
 
-use Exception;
-
 class DeleteUselessFiles
 {
     protected static $extensionsNotFound = [];
@@ -24,27 +22,23 @@ class DeleteUselessFiles
         $camera = $argv[0] ?? null;
 
         if (!$camera) {
-            CommandLine::printRed('The camera argument is missing.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('The camera argument is missing.');
         }
 
         $cameras_and_paths = array_change_key_case(validCamerasAndPaths());
 
         if (!isset($cameras_and_paths[strtolower($camera)])) {
-            CommandLine::printRed('The camera is not in the config file.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('The camera is not in the config file.');
         }
 
         $result = shell_exec(self::COMMAND_FIND);
 
         if ($result === false) {
-            CommandLine::printRed('The pipe cannot be established.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('The pipe cannot be established.');
         }
 
         if ($result === null) {
-            CommandLine::printRed('No useless file found.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('No useless file found.');
         }
         CommandLine::printGreen($result);
         CommandLine::confirmOrAbort();

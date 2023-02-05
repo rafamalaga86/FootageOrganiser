@@ -4,7 +4,7 @@ namespace RafaMalaga86\FootageOrganiser;
 
 use Exception;
 
-class OrganiserScript
+class FootageOrganiser
 {
     public static function run(array $argv)
     {
@@ -19,26 +19,22 @@ class OrganiserScript
         $organise_dir = $argv[1] ?? null;
 
         if (!$main_dir) {
-            CommandLine::printRed('The main directory argument is missing.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('The main directory argument is missing.');
         }
 
         if (!$organise_dir) {
-            CommandLine::printRed('The organise directory argument is missing.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('The organise directory argument is missing.');
         }
 
         $main_dir = realpath($main_dir);
         $organise_dir = realpath($organise_dir);
 
         if (!is_dir($main_dir)) {
-            CommandLine::printRed('Could not locate the main directory argument.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('Could not locate the main directory argument.');
         }
 
         if (!is_dir($organise_dir)) {
-            CommandLine::printRed('Could not locate the organise directory argument.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('Could not locate the organise directory argument.');
         }
 
         $could_change_dir = chdir($organise_dir);
@@ -50,7 +46,6 @@ class OrganiserScript
         $file_list = FileManagement::scandirTree('.');
         $replacements = self::getReplacements($file_list, $organise_dir);
         self::organise($file_list, $main_dir, $replacements);
-        exit(0);
     }
 
     protected static function getReplacements(array $file_list, string $organise_dir): array
@@ -79,16 +74,15 @@ class OrganiserScript
         foreach ($file_list as $file) {
             // Is this file meant to be ignored?
             $file_exploded = explode('/', $file);
-            $file_name = end($file_exploded);
-            if (in_array($file_name, organiserScriptIgnores())) {
+            $filename = end($file_exploded);
+            if (in_array($filename, fileIgnores())) {
                 continue;
             }
 
             try {
                 list($creation_date, $data_source) = FileManagement::getFileCreationDate($file);
-            } catch (Exception $e) {
-                CommandLine::printRed($e->getMessage() . PHP_EOL);
-                exit(1);
+            } catch (Exception $exception) {
+                throw new Exit1Exception($exception->getMessage());
             }
 
             $file_destiny = $file;
@@ -107,9 +101,8 @@ class OrganiserScript
 
             try {
                 $dir_found = self::findDir($dir, $creation_date);
-            } catch (Exception $e) {
-                CommandLine::printRed($e->getMessage() . PHP_EOL);
-                exit(1);
+            } catch (Exception $exception) {
+                throw new Exit1Exception($exception->getMessage());
             }
             // $dir_exists = file_exists($dir . '/' . $file['creation_date']);
 
@@ -159,13 +152,11 @@ class OrganiserScript
         }
 
         if ($abort) {
-            CommandLine::printRed('ERROR: There are some files that already exist in the destiny. Script didnt start.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('ERROR: There are some files that already exist in the destiny. Script didnt start.');
         }
 
         if (!$file_moving_list) {
-            CommandLine::printRed('ERROR: There are no files in the dir to organise.' . PHP_EOL);
-            exit(1);
+            throw new Exit1Exception('ERROR: There are no files in the dir to organise.');
         }
 
 

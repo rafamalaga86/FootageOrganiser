@@ -21,7 +21,7 @@ function exceptions(): array
     ];
 }
 
-function organiserScriptIgnores(): array
+function fileIgnores(): array
 {
     return [
         'fileinfo_list.list',
