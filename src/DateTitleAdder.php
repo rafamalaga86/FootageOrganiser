@@ -2,15 +2,19 @@
 
 namespace FootageOrganiser;
 
+use Carbon\Carbon;
 use Exception;
+use TypeError;
 
-class DateTitleSetter
+class DateTitleAdder
 {
-    protected static $extensionsNotFound = [];
+    protected static $files_without_date = [];
+
+    protected static $files_without_time = [];
 
     public static function run(array $argv): void
     {
-        echo 'DATE TITLE SETTER' . PHP_EOL;
+        echo 'DATE TITLE ADDER' . PHP_EOL;
         echo '======================' . PHP_EOL;
 
         // Remove script name from argument list
@@ -35,47 +39,64 @@ class DateTitleSetter
             throw new Exit1Exception('Could not change dir.');
         }
 
+        $carbon_modifier = $argv[1] ?? null;
+
+        if (!$carbon_modifier) {
+            throw new Exit1Exception('The carbon modifier argument is missing.');
+        }
+        try {
+            $test = (new Carbon())->add($carbon_modifier);
+        } catch(TypeError $error) {
+            throw new Exit1Exception($carbon_modifier . ': There is something wrong with the carbon modifier you entered.');
+        }
+
         $file_list = FileManagement::scandirTree('.');
 
         $filtered_list = [];
         foreach ($file_list as $file) {
+            $quit = false;
             $filename = basename($file);
 
             if (in_array($filename, fileIgnores())) {
                 continue;
             }
 
-            // We have to filter out the ones with title already in the name
-            if (FileManagement::hasAtLeastOneCreationDateFromTitleYYYYMMDD($file)) {
+            // We have to filter out the ones without date in the title
+            if (!FileManagement::hasOneCreationDateFromTitleYYYYMMDD($file)) {
+                $this->files_without_date[] = $file;
+                $quit = true;
+            }
+
+            // We have to filter out the ones without time in the title
+            if (!FileManagement::hasOneCreationTimeFromTitleHHMMSS($file)) {
+                $this->files_without_time[] = $file;
+                $quit = true;
+            }
+
+            if ($quit) {
                 continue;
             }
 
+
+            // START
             try {
-                list($creation_date, $data_source_date) = FileManagement::getFileCreationDate($filename);
-                $creation_time = FileManagement::getFileCreationTime($file);
+                $old_creation_date = FileManagement::getCreationDateFromTitleYYYYMMDD($filename);
+                $old_creation_time = FileManagement::getCreationTimeFromTitleHHMMSS($filename);
             } catch (Exception $exception) {
                 throw new Exit1Exception($exception->getMessage());
             }
 
-            $ext = FileManagement::getFileExtension($file);
+            $carbon = new Carbon($old_creation_date . 'T' . $old_creation_time);
+            $carbon->add($carbon_modifier);
 
-            $prefix = self::getPrefix($ext) ? self::getPrefix($ext) . '_' : '';
-            $new_name = $prefix
-                . $creation_date . '_'
-                . $creation_time . '_'
-                . $filename;
+            $new_name = str_replace($old_creation_date, $carbon->format('Y-m-d'), $filename);
+            $new_name = str_replace($old_creation_time, $carbon->format('H;i;s'), $new_name);
+            var_dump($old_creation_time, $carbon->format('H;i;s'), $new_name); die('constante');
+
             $filtered_list[$file] = $new_name;
 
             echo $file . ' -> ';
             CommandLine::printGreen($new_name . PHP_EOL);
-        }
-
-        if (self::$extensionsNotFound) {
-            echo PHP_EOL;
-            CommandLine::printYellow('One or more files don\'t have a file prefix associated to their extension:');
-            echo PHP_EOL;
-            echo implode(', ', self::$extensionsNotFound);
-            echo PHP_EOL;
         }
 
         if (!$filtered_list) {
@@ -100,21 +121,5 @@ class DateTitleSetter
         }
 
         CommandLine::printGreen('Done.' . PHP_EOL);
-    }
-
-    protected static function addExtensionNotFound(string $extension)
-    {
-        if (!in_array($extension, self::$extensionsNotFound)) {
-            self::$extensionsNotFound[] = $extension;
-        }
-    }
-
-    protected static function getPrefix(string $extension)
-    {
-        if (isset(prefixesByExtension()[$extension])) {
-            return prefixesByExtension()[$extension];
-        }
-
-        self::addExtensionNotFound($extension);
     }
 }

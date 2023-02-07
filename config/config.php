@@ -54,7 +54,25 @@ function prefixesByExtension()
 function validCamerasAndPaths()
 {
     return [
-        'GoPro9' => '/Volumes/GoPro9/DCIM/ ',
-        'GoPro11' => '/Volumes/GoPro11/DCIM/ ',
+        'GoPro9' => '/Volumes/GoPro9/DCIM/',
+        'GoPro11' => '/Volumes/GoPro11/DCIM/',
+    ];
+}
+
+function sourceAliasPaths()
+{
+    return [
+        'GoPro9' => '/Volumes/GoPro9/DCIM',
+        'GoPro11' => '/Volumes/GoPro11/DCIM',
+        'OneX2' => '/Volumes/OneX2/DCIM',
+        'GO2' => '/Volumes/Insta360GO2/DCIM',
+    ];
+}
+
+function destinyAliasPaths()
+{
+    return [
+        'new' => '/Volumes/Extreme\ SSD/Video\ Workspace/Footage/new',
+        'USA' => '/Volumes/Extreme\ SSD/Video\ Workspace/Footage/USA',
     ];
 }

@@ -1,14 +1,12 @@
 <?php
 
-namespace RafaMalaga86\FootageOrganiser;
+namespace FootageOrganiser;
 
 class DeleteUselessFiles
 {
     protected static $extensionsNotFound = [];
 
-    protected const COMMAND_FIND = 'find /Volumes/GoPro11/DCIM \( -name "*.LRV" -o -name "*.THM" \) -print -type f | sort';
-
-    protected const COMMAND_FIND_AND_DELETE = 'find /Volumes/GoPro11/DCIM \( -name "*.LRV" -o -name "*.THM" \) -print -type f -delete | sort';
+    protected const COMMAND_FIND = 'find %s \( -name "*.LRV" -o -name "*.THM" \) -print -type f %s | sort';
 
     public static function run(array $argv): void
     {
@@ -19,32 +17,41 @@ class DeleteUselessFiles
         unset($argv[0]);
         $argv = array_values($argv);
 
-        $camera = $argv[0] ?? null;
+        $dir = $argv[0] ?? null;
 
-        if (!$camera) {
-            throw new Exit1Exception('The camera argument is missing.');
+        if (!$dir) {
+            throw new Exit1Exception('The directory argument is missing.');
         }
 
-        $cameras_and_paths = array_change_key_case(validCamerasAndPaths());
+        $dir = realpath($dir);
 
-        if (!isset($cameras_and_paths[strtolower($camera)])) {
-            throw new Exit1Exception('The camera is not in the config file.');
+        if (!is_dir($dir)) {
+            throw new Exit1Exception('Could not locate the directory argument.');
         }
 
-        $result = shell_exec(self::COMMAND_FIND);
+        $command = self::getFindCommand($dir);
+        $result = shell_exec($command);
 
         if ($result === false) {
             throw new Exit1Exception('The pipe cannot be established.');
         }
 
         if ($result === null) {
-            throw new Exit1Exception('No useless file found.');
+            CommandLine::printGreen('No useless files found.' . PHP_EOL);
+            return;
         }
+
         CommandLine::printGreen($result);
         CommandLine::confirmOrAbort();
 
-        shell_exec(self::COMMAND_FIND_AND_DELETE);
+        $command = self::getFindCommand($dir, delete:true);
+        shell_exec($command);
 
         CommandLine::printGreen('Files deleted successfully!' . PHP_EOL);
+    }
+
+    protected static function getFindCommand($path, $delete = false): string
+    {
+        return sprintf(self::COMMAND_FIND, $path, $delete ? '-delete' : '');
     }
 }

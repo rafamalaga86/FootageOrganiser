@@ -1,6 +1,6 @@
 <?php
 
-namespace RafaMalaga86\FootageOrganiser;
+namespace FootageOrganiser;
 
 use DateTime;
 use Exception;
@@ -46,13 +46,34 @@ class FileManagement
         return $result;
     }
 
-    public static function hasCreationDateFromTitleYYYYMMDD(string $file): bool
+    public static function hasAtLeastOneCreationDateFromTitleYYYYMMDD(string $file): bool
     {
         try {
-            $filename = basename($file);
-            $title = self::getCreationDateFromTitleYYYYMMDD($filename);
+            $title = self::getCreationDateFromTitleYYYYMMDD($file);
         } catch (MultipleDatesException $exception) {
             return true; // It has more than one date in the title
+        }
+
+        return (bool) $title;
+    }
+
+    public static function hasOneCreationDateFromTitleYYYYMMDD(string $file): bool
+    {
+        try {
+            $title = self::getCreationDateFromTitleYYYYMMDD($file);
+        } catch (MultipleDatesException $exception) {
+            return false; // It has more than one date in the title
+        }
+
+        return (bool) $title;
+    }
+
+    public static function hasOneCreationTimeFromTitleHHMMSS(string $file): bool
+    {
+        try {
+            $title = self::getCreationTimeFromTitleHHMMSS($file);
+        } catch (MultipleDatesException $exception) {
+            return false; // It has more than one date in the title
         }
 
         return (bool) $title;
@@ -63,6 +84,13 @@ class FileManagement
         $regexp = '/(20\d{2})-?(0[1-9]|1[0-2])-?(0[1-9]|[12][0-9]|3[01])/';
 
         return self::getCreationDateFromTitle($regexp, $file);
+    }
+
+    public static function getCreationTimeFromTitleHHMMSS(string $file): ?string
+    {
+        $regexp = '/([0-1]?[0-9]|2[0-3]);?[0-5][0-9];?[0-5][0-9]/';
+
+        return self::getCreationTimeFromTitle($regexp, $file);
     }
 
     public static function getCreationDateFromTitle(string $regexp, string $file): ?string
@@ -86,6 +114,29 @@ class FileManagement
         }
 
         return $datetime->format('Y-m-d');
+    }
+
+    public static function getCreationTimeFromTitle(string $regexp, string $file): ?string
+    {
+        $matches = [];
+        preg_match_all($regexp, $file, $matches);
+
+        if (!$matches[0]) {
+            return null;
+        }
+        if (count($matches[0]) > 1) {
+            throw new MultipleDatesException('The file ' . $file . ' has two ore more valid times in its title: ' . PHP_EOL . implode(PHP_EOL, $matches[0]) . PHP_EOL);
+        }
+
+        $datetime = DateTime::createFromFormat('His', $matches[0][0]);
+        if (!$datetime) { // Previous failed, try with dashes
+            $datetime = DateTime::createFromFormat('H;i;s', $matches[0][0]);
+        }
+        if (!$datetime) { // Previous failed, try with dashes
+            throw new Exception('Couln\'t get time from the title. ' . PHP_EOL);
+        }
+
+        return $datetime->format('H:i:s');
     }
 
     public static function getFileCreationDateFromMeta(string $file): ?string
@@ -117,9 +168,13 @@ class FileManagement
     }
 
 
-    protected static function scandirFiltered(string $dir): array
+    /**
+     * @var $dir directory to scan
+     * @var $ignore_hidden wheater ignore the .asdf files or not
+     */
+    protected static function scandirFiltered(string $dir, bool $ignore_hidden = true): array
     {
-        $list = scandir($dir);
+        $list = $ignore_hidden ? preg_grep('/^([^.])/', scandir($dir)) : scandir($dir);
 
         $to_filter = [];
 

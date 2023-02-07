@@ -1,6 +1,6 @@
 <?php
 
-namespace RafaMalaga86\FootageOrganiser;
+namespace FootageOrganiser;
 
 use Exception;
 
@@ -15,8 +15,8 @@ class FootageOrganiser
         unset($argv[0]);
         $argv = array_values($argv);
 
-        $main_dir = $argv[0] ?? null;
-        $organise_dir = $argv[1] ?? null;
+        $organise_dir = $argv[0] ?? null;
+        $main_dir = $argv[1] ?? null;
 
         if (!$main_dir) {
             throw new Exit1Exception('The main directory argument is missing.');
@@ -94,7 +94,6 @@ class FootageOrganiser
                     $camera = $replacement;
                 }
             }
-
             $total_bits += filesize($file);
 
 
@@ -126,7 +125,7 @@ class FootageOrganiser
 
         // Order by creation time
         usort($file_moving_list, function ($a, $b) {
-            return $a['creation_date'] > $b['creation_date'];
+            return $a['creation_date'] <=> $b['creation_date'];
         });
 
         $abort = false;

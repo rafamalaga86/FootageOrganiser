@@ -1,6 +1,6 @@
 <?php
 
-namespace RafaMalaga86\FootageOrganiser;
+namespace FootageOrganiser;
 
 use Exception;
 

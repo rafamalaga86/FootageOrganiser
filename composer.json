@@ -1,10 +1,14 @@
 {
-    "name": "rafa/footage-organiser",
+    "name": "rafa/footage-wizard",
     "description": "Simple script to organise your video footage by date taken",
+    "license": "GPL-2.0-or-later",
     "autoload": {
         "psr-4": {
-            "Rafa\\FootageOrganiser\\": "src/"
-        }
+            "FootageOrganiser\\": "src"
+        },
+        "files": [
+            "config/config.php"
+        ]
     },
     "authors": [
         {
@@ -12,5 +16,7 @@
             "email": "rafamalaga86@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "nesbot/carbon": "^2.66"
+    }
 }

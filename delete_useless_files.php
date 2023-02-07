@@ -5,9 +5,9 @@ require 'src/CommandLine.php';
 require 'src/DeleteUselessFiles.php';
 require 'src/Exit1Exception.php';
 
-use RafaMalaga86\FootageOrganiser\DeleteUselessFiles;
-use RafaMalaga86\FootageOrganiser\Exit1Exception;
-use RafaMalaga86\FootageOrganiser\CommandLine;
+use FootageOrganiser\DeleteUselessFiles;
+use FootageOrganiser\Exit1Exception;
+use FootageOrganiser\CommandLine;
 
 try {
     DeleteUselessFiles::run($argv);

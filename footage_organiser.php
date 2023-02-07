@@ -7,9 +7,9 @@ require 'src/FileManagement.php';
 require 'src/FootageOrganiser.php';
 require 'vendor/autoload.php';
 
-use RafaMalaga86\FootageOrganiser\CommandLine;
-use RafaMalaga86\FootageOrganiser\Exit1Exception;
-use RafaMalaga86\FootageOrganiser\FootageOrganiser;
+use FootageOrganiser\CommandLine;
+use FootageOrganiser\Exit1Exception;
+use FootageOrganiser\FootageOrganiser;
 
 
 try {

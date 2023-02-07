@@ -3,17 +3,21 @@
 require 'config.php';
 require 'src/CommandLine.php';
 require 'src/DateTitleSetter.php';
+require 'src/DeleteUselessFiles.php';
 require 'src/Exit1Exception.php';
 require 'src/FileManagement.php';
+require 'src/FootageOrganiser.php';
+require 'src/FootageWizard.php';
+require 'src/InvalidFootageFinder.php';
 require 'src/MultipleDatesException.php';
+require 'vendor/autoload.php';
 
-
-use FootageOrganiser\DateTitleSetter;
-use FootageOrganiser\Exit1Exception;
 use FootageOrganiser\CommandLine;
+use FootageOrganiser\Exit1Exception;
+use FootageOrganiser\FootageWizard;
 
 try {
-    DateTitleSetter::run($argv);
+    FootageWizard::run($argv);
 } catch (Exit1Exception $exception) {
     CommandLine::printRed($exception->getMessage() . PHP_EOL);
     exit(1);
