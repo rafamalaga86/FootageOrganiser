@@ -25,7 +25,7 @@ class FileManagement
         $result = [self::getCreationDateFromTitleYYYYMMDD($filename), 'title'];
 
         if (!$result[0]) {
-            $result = [self::getFileCreationDateFromMeta($file), 'meta'];
+            $result = [self::getFileMTimeDate($file), 'meta'];
         }
 
         if (!$result[0]) {
@@ -37,7 +37,8 @@ class FileManagement
 
     public static function getFileCreationTime(string $file, $format = 'H;i;s'): string
     {
-        $result = self::getFileCreationTimeFromMeta($file, $format);
+        // Try to get it from title
+        $result = self::getFileMTimeTime($file, $format);
 
         if (!$result) {
             throw new Exception('Could not find the creation time of file ' . $file);
@@ -73,7 +74,6 @@ class FileManagement
         try {
             $title = self::getCreationTimeFromTitleHHMMSS($file);
         } catch (MultipleDatesException $exception) {
-            var_dump($exception->getMessage()); die('constante');
             return false; // It has more than one date in the title
         }
 
@@ -112,7 +112,7 @@ class FileManagement
 
     public static function getCreationTimeFromTitleHHMMSS(string $file, string $format = 'H:i:s'): ?string
     {
-        $regexp = '/[^\d]([0-1][0-9]|2[0-3]);?[0-5][0-9];?[0-5][0-9][^\d]/';
+        $regexp = '/[^\d]([0-1][0-9]|2[0-3]);?[0-5][0-9];?[0-5][0-9][^\d.]/';
 
         return self::getCreationTimeFromTitle($regexp, $file, $format);
     }
@@ -143,7 +143,7 @@ class FileManagement
         return $format ? $datetime->format($format) : $time;
     }
 
-    public static function getFileCreationDateFromMeta(string $file): ?string
+    public static function getFileBTimeDate(string $file, string $format = 'Y-m-d'): ?string
     {
         $handle = popen('stat -f %B ' . escapeshellarg($file), 'r');
         if (!$handle) {
@@ -151,13 +151,25 @@ class FileManagement
         }
 
         $btime = trim(fread($handle, 100));
-        $date_string = date("Y-m-d", $btime);
+        $date_string = date($format, $btime);
         pclose($handle);
 
         return $date_string;
     }
 
-    public static function getFileCreationTimeFromMeta(string $file, string $format = 'H;i;s'): ?string
+    public static function getFileCTimeDate(string $file, string $format = 'Y-m-d'): ?string
+    {
+        $ctime = filectime($file);
+        return date($format, $ctime);
+    }
+
+    public static function getFileMTimeDate(string $file, string $format = 'Y-m-d'): ?string
+    {
+        $mtime = filemtime($file);
+        return date($format, $mtime);
+    }
+
+    public static function getFileBTimeTime(string $file, string $format = 'H;i;s'): ?string
     {
         $handle = popen('stat -f %B ' . escapeshellarg($file), 'r');
         if (!$handle) {
@@ -169,6 +181,18 @@ class FileManagement
         pclose($handle);
 
         return $time_string;
+    }
+
+    public static function getFileCTimeTime(string $file, string $format = 'H;i;s'): ?string
+    {
+        $ctime = filectime($file);
+        return date($format, $ctime);
+    }
+
+    public static function getFileMTimeTime(string $file, string $format = 'H;i;s'): ?string
+    {
+        $mtime = filemtime($file);
+        return date($format, $mtime);
     }
 
 
