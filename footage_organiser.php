@@ -1,10 +1,5 @@
 <?php
 
-require 'config.php';
-require 'src/CommandLine.php';
-require 'src/Exit1Exception.php';
-require 'src/FileManagement.php';
-require 'src/FootageOrganiser.php';
 require 'vendor/autoload.php';
 
 use FootageOrganiser\CommandLine;

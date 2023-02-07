@@ -41,6 +41,7 @@ class DateTitleSetter
         foreach ($file_list as $file) {
             $filename = basename($file);
 
+            // Is it in the list of files to ignore
             if (in_array($filename, fileIgnores())) {
                 continue;
             }
@@ -51,7 +52,7 @@ class DateTitleSetter
             }
 
             try {
-                list($creation_date, $data_source_date) = FileManagement::getFileCreationDate($filename);
+                list($creation_date, $data_source_date) = FileManagement::getFileCreationDate($file);
                 $creation_time = FileManagement::getFileCreationTime($file);
             } catch (Exception $exception) {
                 throw new Exit1Exception($exception->getMessage());

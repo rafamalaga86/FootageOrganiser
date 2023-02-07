@@ -73,6 +73,7 @@ class FileManagement
         try {
             $title = self::getCreationTimeFromTitleHHMMSS($file);
         } catch (MultipleDatesException $exception) {
+            var_dump($exception->getMessage()); die('constante');
             return false; // It has more than one date in the title
         }
 
@@ -84,13 +85,6 @@ class FileManagement
         $regexp = '/(20\d{2})-?(0[1-9]|1[0-2])-?(0[1-9]|[12][0-9]|3[01])/';
 
         return self::getCreationDateFromTitle($regexp, $file, $format);
-    }
-
-    public static function getCreationTimeFromTitleHHMMSS(string $file, string $format = 'H:i:s'): ?string
-    {
-        $regexp = '/([0-1]?[0-9]|2[0-3]);?[0-5][0-9];?[0-5][0-9]/';
-
-        return self::getCreationTimeFromTitle($regexp, $file, $format);
     }
 
     public static function getCreationDateFromTitle(string $regexp, string $file, string $format = 'Y-m-d'): ?string
@@ -116,6 +110,13 @@ class FileManagement
         return $format ? $datetime->format($format) : $matches[0][0];
     }
 
+    public static function getCreationTimeFromTitleHHMMSS(string $file, string $format = 'H:i:s'): ?string
+    {
+        $regexp = '/[^\d]([0-1][0-9]|2[0-3]);?[0-5][0-9];?[0-5][0-9][^\d]/';
+
+        return self::getCreationTimeFromTitle($regexp, $file, $format);
+    }
+
     public static function getCreationTimeFromTitle(string $regexp, string $file, string $format = 'H:i:s'): ?string
     {
         $matches = [];
@@ -128,15 +129,18 @@ class FileManagement
             throw new MultipleDatesException('The file ' . $file . ' has two ore more valid times in its title: ' . PHP_EOL . implode(PHP_EOL, $matches[0]) . PHP_EOL);
         }
 
-        $datetime = DateTime::createFromFormat('His', $matches[0][0]);
+        // Remove first and last characters of the string, they are not the time
+        $time = substr($matches[0][0], 1, -1);
+
+        $datetime = DateTime::createFromFormat('His', $time);
         if (!$datetime) { // Previous failed, try with dashes
-            $datetime = DateTime::createFromFormat('H;i;s', $matches[0][0]);
+            $datetime = DateTime::createFromFormat('H;i;s', $time);
         }
         if (!$datetime) { // Previous failed, try with dashes
             throw new Exception('Couln\'t get time from the title. ' . PHP_EOL);
         }
 
-        return $format ? $datetime->format($format) : $matches[0][0];
+        return $format ? $datetime->format($format) : $time;
     }
 
     public static function getFileCreationDateFromMeta(string $file): ?string

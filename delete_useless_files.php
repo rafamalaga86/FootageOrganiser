@@ -1,9 +1,6 @@
 <?php
 
-require 'config.php';
-require 'src/CommandLine.php';
-require 'src/DeleteUselessFiles.php';
-require 'src/Exit1Exception.php';
+require 'vendor/autoload.php';
 
 use FootageOrganiser\DeleteUselessFiles;
 use FootageOrganiser\Exit1Exception;

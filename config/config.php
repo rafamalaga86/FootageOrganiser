@@ -72,7 +72,7 @@ function sourceAliasPaths()
 function destinyAliasPaths()
 {
     return [
-        'new' => '/Volumes/Extreme\ SSD/Video\ Workspace/Footage/new',
-        'USA' => '/Volumes/Extreme\ SSD/Video\ Workspace/Footage/USA',
+        'new' => '/Volumes/Extreme SSD/Video Workspace/Footage/new',
+        'USA' => '/Volumes/Extreme SSD/Video Workspace/Footage/USA',
     ];
 }

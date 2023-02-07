@@ -1,12 +1,6 @@
 <?php
 
-require 'config.php';
-require 'src/CommandLine.php';
-require 'src/DateTitleSetter.php';
-require 'src/Exit1Exception.php';
-require 'src/FileManagement.php';
-require 'src/MultipleDatesException.php';
-
+require 'vendor/autoload.php';
 
 use FootageOrganiser\DateTitleSetter;
 use FootageOrganiser\Exit1Exception;

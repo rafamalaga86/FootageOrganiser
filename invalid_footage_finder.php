@@ -1,10 +1,5 @@
 <?php
 
-require 'config.php';
-require 'src/CommandLine.php';
-require 'src/Exit1Exception.php';
-require 'src/FileManagement.php';
-require 'src/InvalidFootageFinder.php';
 require 'vendor/autoload.php';
 
 use FootageOrganiser\InvalidFootageFinder;

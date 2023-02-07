@@ -77,7 +77,6 @@ class DateTitleAdder
                 continue;
             }
 
-
             // START
             try {
                 $old_creation_date = FileManagement::getCreationDateFromTitleYYYYMMDD($filename, false);
