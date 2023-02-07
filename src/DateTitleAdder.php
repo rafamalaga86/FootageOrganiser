@@ -63,13 +63,13 @@ class DateTitleAdder
 
             // We have to filter out the ones without date in the title
             if (!FileManagement::hasOneCreationDateFromTitleYYYYMMDD($file)) {
-                $this->files_without_date[] = $file;
+                self::$files_without_date[] = $file;
                 $quit = true;
             }
 
             // We have to filter out the ones without time in the title
             if (!FileManagement::hasOneCreationTimeFromTitleHHMMSS($file)) {
-                $this->files_without_time[] = $file;
+                self::$files_without_time[] = $file;
                 $quit = true;
             }
 
@@ -80,18 +80,19 @@ class DateTitleAdder
 
             // START
             try {
-                $old_creation_date = FileManagement::getCreationDateFromTitleYYYYMMDD($filename);
-                $old_creation_time = FileManagement::getCreationTimeFromTitleHHMMSS($filename);
+                $old_creation_date = FileManagement::getCreationDateFromTitleYYYYMMDD($filename, false);
+                $old_creation_time = FileManagement::getCreationTimeFromTitleHHMMSS($filename, false);
+                $old_creation_date_formatted = FileManagement::getCreationDateFromTitleYYYYMMDD($filename);
+                $old_creation_time_formatted = FileManagement::getCreationTimeFromTitleHHMMSS($filename);
             } catch (Exception $exception) {
                 throw new Exit1Exception($exception->getMessage());
             }
 
-            $carbon = new Carbon($old_creation_date . 'T' . $old_creation_time);
+            $carbon = new Carbon($old_creation_date_formatted . 'T' . $old_creation_time_formatted);
             $carbon->add($carbon_modifier);
 
             $new_name = str_replace($old_creation_date, $carbon->format('Y-m-d'), $filename);
             $new_name = str_replace($old_creation_time, $carbon->format('H;i;s'), $new_name);
-            var_dump($old_creation_time, $carbon->format('H;i;s'), $new_name); die('constante');
 
             $filtered_list[$file] = $new_name;
 
@@ -102,6 +103,20 @@ class DateTitleAdder
         if (!$filtered_list) {
             CommandLine::printGreen('There is no files to be renamed.' . PHP_EOL);
             return;
+        }
+
+        echo PHP_EOL;
+        if (self::$files_without_date) {
+            echo 'One or more files didn\'t have ';
+            CommandLine::printYellow('date: ' . PHP_EOL);
+            CommandLine::printList(self::$files_without_date);
+        }
+
+        echo PHP_EOL;
+        if (self::$files_without_time) {
+            echo 'One or more files didn\'t have ';
+            CommandLine::printYellow('time: ' . PHP_EOL);
+            CommandLine::printList(self::$files_without_time);
         }
 
         CommandLine::confirmOrAbort();
@@ -116,7 +131,7 @@ class DateTitleAdder
             $was_renamed = rename($file, $new_file);
 
             if (!$was_renamed) {
-                throw new Exit1Exception('File could not be renamed.');
+                throw new Exit1Exception($file .' <- File could not be renamed. Every file before this one in the list, was removed');
             }
         }
 

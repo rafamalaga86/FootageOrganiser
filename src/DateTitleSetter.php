@@ -95,7 +95,7 @@ class DateTitleSetter
             $was_renamed = rename($file, $new_file);
 
             if (!$was_renamed) {
-                throw new Exit1Exception('File could not be renamed.');
+                throw new Exit1Exception($file .' <- File could not be renamed. Every file before this one in the list, was removed');
             }
         }
 

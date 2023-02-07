@@ -79,21 +79,21 @@ class FileManagement
         return (bool) $title;
     }
 
-    public static function getCreationDateFromTitleYYYYMMDD(string $file): ?string
+    public static function getCreationDateFromTitleYYYYMMDD(string $file, string $format = 'Y-m-d'): ?string
     {
         $regexp = '/(20\d{2})-?(0[1-9]|1[0-2])-?(0[1-9]|[12][0-9]|3[01])/';
 
-        return self::getCreationDateFromTitle($regexp, $file);
+        return self::getCreationDateFromTitle($regexp, $file, $format);
     }
 
-    public static function getCreationTimeFromTitleHHMMSS(string $file): ?string
+    public static function getCreationTimeFromTitleHHMMSS(string $file, string $format = 'H:i:s'): ?string
     {
         $regexp = '/([0-1]?[0-9]|2[0-3]);?[0-5][0-9];?[0-5][0-9]/';
 
-        return self::getCreationTimeFromTitle($regexp, $file);
+        return self::getCreationTimeFromTitle($regexp, $file, $format);
     }
 
-    public static function getCreationDateFromTitle(string $regexp, string $file): ?string
+    public static function getCreationDateFromTitle(string $regexp, string $file, string $format = 'Y-m-d'): ?string
     {
         $matches = [];
         preg_match_all($regexp, $file, $matches);
@@ -113,10 +113,10 @@ class FileManagement
             throw new Exception('Couln\'t get date from the title. ' . PHP_EOL);
         }
 
-        return $datetime->format('Y-m-d');
+        return $format ? $datetime->format($format) : $matches[0][0];
     }
 
-    public static function getCreationTimeFromTitle(string $regexp, string $file): ?string
+    public static function getCreationTimeFromTitle(string $regexp, string $file, string $format = 'H:i:s'): ?string
     {
         $matches = [];
         preg_match_all($regexp, $file, $matches);
@@ -136,7 +136,7 @@ class FileManagement
             throw new Exception('Couln\'t get time from the title. ' . PHP_EOL);
         }
 
-        return $datetime->format('H:i:s');
+        return $format ? $datetime->format($format) : $matches[0][0];
     }
 
     public static function getFileCreationDateFromMeta(string $file): ?string
