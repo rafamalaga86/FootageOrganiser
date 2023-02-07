@@ -62,7 +62,7 @@ class DateTitleSetter
 
             $prefix = self::getPrefix($ext) ? self::getPrefix($ext) . '_' : '';
             $new_name = $prefix
-                . $creation_date . 'T'
+                . $creation_date . '_'
                 . $creation_time . '_'
                 . $filename;
             $filtered_list[$file] = $new_name;

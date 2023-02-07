@@ -2,7 +2,8 @@
 
 namespace FootageOrganiser;
 
-use Exception;
+use Carbon\Carbon;
+use TypeError;
 
 class FootageWizard
 {
@@ -10,6 +11,7 @@ class FootageWizard
     {
         $source = $argv[1] ?? null;
         $destiny = $argv[2] ?? null;
+        $carbon_modifier = $argv[3] ?? null;
 
         if (!$source) {
             throw new Exit1Exception('The directory argument is missing.');
@@ -29,12 +31,25 @@ class FootageWizard
             throw new Exit1Exception('Could not locate the destiny directory argument.');
         }
 
+        if ($carbon_modifier) {
+            try {
+                $test = (new Carbon())->add($carbon_modifier);
+            } catch(TypeError $error) {
+                throw new Exit1Exception($carbon_modifier . ': There is something wrong with the carbon modifier you entered.');
+            }
+        }
+
         $argv = ['', $source, $destiny];
         DeleteUselessFiles::run($argv);
         echo PHP_EOL;
 
         DateTitleSetter::run($argv);
         echo PHP_EOL;
+
+        if ($carbon_modifier) {
+            DateTitleAdder::run([$argv[0], $argv[1], $carbon_modifier]);
+            echo PHP_EOL;
+        }
 
         FootageOrganiser::run($argv);
         echo PHP_EOL;
