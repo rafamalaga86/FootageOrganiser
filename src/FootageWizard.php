@@ -34,7 +34,7 @@ class FootageWizard
         if ($carbon_modifier) {
             try {
                 $test = (new Carbon())->add($carbon_modifier);
-            } catch(TypeError $error) {
+            } catch (TypeError $error) {
                 throw new Exit1Exception($carbon_modifier . ': There is something wrong with the carbon modifier you entered.');
             }
         }
@@ -46,10 +46,8 @@ class FootageWizard
         DateTitleSetter::run($argv);
         echo PHP_EOL;
 
-        if ($carbon_modifier) {
-            DateTitleAdder::run([$argv[0], $argv[1], $carbon_modifier]);
-            echo PHP_EOL;
-        }
+        DateTitleAdder::run([$argv[0], $argv[1], $carbon_modifier]);
+        echo PHP_EOL;
 
         FootageOrganiser::run($argv);
         echo PHP_EOL;

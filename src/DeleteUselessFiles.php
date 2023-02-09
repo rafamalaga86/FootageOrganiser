@@ -6,7 +6,7 @@ class DeleteUselessFiles
 {
     protected static $extensionsNotFound = [];
 
-    protected const COMMAND_FIND = 'find %s \( -name "*.LRV" -o -name "*.THM" \) -print -type f %s | sort';
+    protected const COMMAND_FIND = 'find %s \( -name "*.LRV" -o -name "*.THM" -o -name "*LRV_*.mp4" \) -print -type f %s | sort';
 
     public static function run(array $argv): void
     {

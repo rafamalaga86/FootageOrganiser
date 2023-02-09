@@ -14,43 +14,66 @@ class FileManagement
         '/^\._.*$/',
     ];
 
+    /**
+     * Get the extension of the file
+     * @var $filepath file(path)
+     */
     public static function getFileExtension(string $filepath): string
     {
         return strtolower(pathinfo($filepath, PATHINFO_EXTENSION));
     }
 
-    public static function getFileCreationDate(string $file): array
+    /**
+     * This method is used for when you don't mind where the DATE is coming from
+     * @var $filepath file path
+     * @var $return_format the fortmat in which the creation DATE will be returned
+     */
+    public static function getFileCreationDate(string $filepath, $return_format = 'Y-m-d'): array
     {
-        $filename = basename($file);
-        $result = [self::getCreationDateFromTitleYYYYMMDD($filename), 'title'];
+        $filename = basename($filepath);
+        $result = [self::getDateFromTitle($filename, $return_format), 'title'];
 
         if (!$result[0]) {
-            $result = [self::getFileMTimeDate($file), 'meta'];
+            $result = [self::getFileMTimeDate($filepath, $return_format), 'meta'];
         }
 
         if (!$result[0]) {
-            throw new Exception('Could not find the creation date of file ' . $file);
+            throw new Exception('Could not find the creation date of file ' . $filepath);
         }
 
         return $result;
     }
 
-    public static function getFileCreationTime(string $file, $format = 'H;i;s'): string
+    /**
+     * This method is used for when you don't mind where the TIME is coming from
+     * @var $filepath file path
+     * @var $return_format the fortmat in which the creation TIME will be returned
+     */
+    public static function getFileCreationTime(string $filepath, $return_format = 'H:i:s'): array
     {
+        $filename = basename($filepath);
         // Try to get it from title
-        $result = self::getFileMTimeTime($file, $format);
+        $result = [self::getTimeFromTitle($filename, $return_format), 'title'];
+
+        if (!$result[0]) { // Get it from the metadata
+            $result = [self::getFileMTimeTime($filepath, $return_format), 'meta'];
+        }
 
         if (!$result) {
-            throw new Exception('Could not find the creation time of file ' . $file);
+            throw new Exception('Could not find the creation time of file ' . $filepath);
         }
 
         return $result;
     }
 
-    public static function hasAtLeastOneCreationDateFromTitleYYYYMMDD(string $file): bool
+    /**
+     * Check if the filename has at least ONE date in the title
+     * @var $filename
+     */
+    public static function hasAtLeastOneDateInTitle(string $filename): bool
     {
         try {
-            $title = self::getCreationDateFromTitleYYYYMMDD($file);
+            $title = self::getDateFromTitle($filename);
         } catch (MultipleDatesException $exception) {
             return true; // It has more than one date in the title
         }
@@ -58,10 +81,29 @@ class FileManagement
         return (bool) $title;
     }
 
-    public static function hasOneCreationDateFromTitleYYYYMMDD(string $file): bool
+    /**
+     * Check if the filename has at least ONE time in the title
+     * @var $filename
+     */
+    public static function hasAtLeastOneTimeInTitle(string $filename): bool
     {
         try {
-            $title = self::getCreationDateFromTitleYYYYMMDD($file);
+            $title = self::getTimeFromTitle($filename, 'H:i:s');
+        } catch (MultipleDatesException $exception) {
+            return true; // It has more than one time in the title
+        }
+
+        return (bool) $title;
+    }
+
+    /**
+     * Check if the filename has EXACTLY ONE date in the title
+     * @var $filename
+     */
+    public static function hasExactlyOneDateInTitle(string $filename): bool
+    {
+        try {
+            $title = self::getDateFromTitle($filename);
         } catch (MultipleDatesException $exception) {
             return false; // It has more than one date in the title
         }
@@ -69,10 +111,14 @@ class FileManagement
         return (bool) $title;
     }
 
-    public static function hasOneCreationTimeFromTitleHHMMSS(string $file): bool
+    /**
+     * Check if the filename has EXACTLY ONE date with the format Y-m-d
+     * @var $filename
+     */
+    public static function hasExactlyOneTitleDashedIsoDate(string $filename): bool
     {
         try {
-            $title = self::getCreationTimeFromTitleHHMMSS($file);
+            $title = self::getDashedIsoDateInTitle($filename);
         } catch (MultipleDatesException $exception) {
             return false; // It has more than one date in the title
         }
@@ -80,23 +126,88 @@ class FileManagement
         return (bool) $title;
     }
 
-    public static function getCreationDateFromTitleYYYYMMDD(string $file, string $format = 'Y-m-d'): ?string
+    /**
+     * Check if the filename has EXACTLY ONE time with the format H;i;s
+     * @var $filename
+     */
+    public static function hasExactlyOneTimeWithSemicolonInTitle(string $filename): bool
+    {
+        try {
+            $title = self::getTimeWithSemicolonInTitle($filename);
+        } catch (MultipleDatesException $exception) {
+            return false; // It has more than one date in the title
+        }
+
+        return (bool) $title;
+    }
+
+    /**
+     * Find a date in the format 'Y-m-d' in the filename
+     * @var $filename
+     * @var $return_format
+     */
+    public static function getDashedIsoDateInTitle(string $filename, string $return_format = null): ?string
+    {
+        $regexp = '/(20\d{2})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])/';
+
+        return self::getDateFromTitleWithRegExp($regexp, $filename, $return_format);
+    }
+
+    /**
+     * Find a date in the format 'H;i;s' in the filename
+     * @var $filename
+     * @var $return_format
+     */
+    public static function getTimeWithSemicolonInTitle(string $filename, string $return_format = null): ?string
+    {
+        $regexp = '/[^\d]([0-1][0-9]|2[0-3]);[0-5][0-9];[0-5][0-9][^\d]/';
+
+        return self::getTimeFromTitleWithRegExp($regexp, $filename, $return_format);
+    }
+
+    /**
+     * Check if the filename has EXACTLY ONE time in the title
+     * @var $filename
+     */
+    public static function hasExactlyOneTimeInTitle(string $filename): bool
+    {
+        try {
+            $title = self::getTimeFromTitle($filename);
+        } catch (MultipleDatesException $exception) {
+            return false; // It has more than one date in the title
+        }
+
+        return (bool) $title;
+    }
+
+    /**
+     * Get a date from title in all formats, at the moment Ymd and Y-m-d
+     * @var $filename
+     * @var $return_format
+     */
+    public static function getDateFromTitle(string $filename, string $return_format = null): ?string
     {
         $regexp = '/(20\d{2})-?(0[1-9]|1[0-2])-?(0[1-9]|[12][0-9]|3[01])/';
 
-        return self::getCreationDateFromTitle($regexp, $file, $format);
+        return self::getDateFromTitleWithRegExp($regexp, $filename, $return_format);
     }
 
-    public static function getCreationDateFromTitle(string $regexp, string $file, string $format = 'Y-m-d'): ?string
+    /**
+     * Get a date from title in all formats depending on the regular expression passed
+     * @var $regexp
+     * @var $filename
+     * @var $return_format
+     */
+    protected static function getDateFromTitleWithRegExp(string $regexp, string $filename, string $return_format = null): ?string
     {
         $matches = [];
-        preg_match_all($regexp, $file, $matches);
+        preg_match_all($regexp, $filename, $matches);
 
         if (!$matches[0]) {
             return null;
         }
         if (count($matches[0]) > 1) {
-            throw new MultipleDatesException('The file ' . $file . ' has two ore more valid dates in its title: ' . PHP_EOL . implode(PHP_EOL, $matches[0]) . PHP_EOL);
+            throw new MultipleDatesException('The file ' . $filename . ' has two ore more valid dates in its title: ' . PHP_EOL . implode(PHP_EOL, $matches[0]) . PHP_EOL);
         }
 
         $datetime = DateTime::createFromFormat('Ymd', $matches[0][0]);
@@ -107,31 +218,47 @@ class FileManagement
             throw new Exception('Couln\'t get date from the title. ' . PHP_EOL);
         }
 
-        return $format ? $datetime->format($format) : $matches[0][0];
+        return $return_format ? $datetime->format($return_format) : $matches[0][0];
     }
 
-    public static function getCreationTimeFromTitleHHMMSS(string $file, string $format = 'H:i:s'): ?string
+    /**
+     * Get a time from title in all formats, at the moment His and H;i;s
+     * @var $filename
+     * @var $return_format
+     */
+    public static function getTimeFromTitle(string $filename, string $return_format = null): ?string
     {
-        $regexp = '/[^\d]([0-1][0-9]|2[0-3]);?[0-5][0-9];?[0-5][0-9][^\d.]/';
+        $search_regexp = '/[^\dXH]([0-1][0-9]|2[0-3]);?[0-5][0-9];?[0-5][0-9][^\d]/';
 
-        return self::getCreationTimeFromTitle($regexp, $file, $format);
+        return self::getTimeFromTitleWithRegExp($search_regexp, $filename, $return_format);
     }
 
-    public static function getCreationTimeFromTitle(string $regexp, string $file, string $format = 'H:i:s'): ?string
-    {
+    /**
+     * Get a time from title in all formats depending on the regular expression passed
+     * @var $search_regexp
+     * @var $exclude_regexp
+     * @var $filename
+     * @var $return_format
+     */
+    protected static function getTimeFromTitleWithRegExp(
+        string $search_regexp,
+        string $filename,
+        string $return_format = null,
+    ): ?string {
         $matches = [];
-        preg_match_all($regexp, $file, $matches);
+        preg_match_all($search_regexp, $filename, $matches);
 
         if (!$matches[0]) {
             return null;
         }
         if (count($matches[0]) > 1) {
-            throw new MultipleDatesException('The file ' . $file . ' has two ore more valid times in its title: ' . PHP_EOL . implode(PHP_EOL, $matches[0]) . PHP_EOL);
+            $message = 'The file ' . $filename . ' has two ore more valid times in its title: ';
+            $message .= PHP_EOL . implode(PHP_EOL, $matches[0]) . PHP_EOL;
+            throw new MultipleDatesException($message);
         }
 
-        // Remove first and last characters of the string, they are not the time
         $time = substr($matches[0][0], 1, -1);
-
+        // Remove first and last characters of the string, they are not the time
         $datetime = DateTime::createFromFormat('His', $time);
         if (!$datetime) { // Previous failed, try with dashes
             $datetime = DateTime::createFromFormat('H;i;s', $time);
@@ -140,63 +267,94 @@ class FileManagement
             throw new Exception('Couln\'t get time from the title. ' . PHP_EOL);
         }
 
-        return $format ? $datetime->format($format) : $time;
+        return $return_format ? $datetime->format($return_format) : $time;
     }
 
-    public static function getFileBTimeDate(string $file, string $format = 'Y-m-d'): ?string
+    /**
+     * Get the BTime date from the file
+     * @var $filepath
+     * @var $return_format
+     */
+    public static function getFileBTimeDate(string $filepath, string $return_format): ?string
     {
-        $handle = popen('stat -f %B ' . escapeshellarg($file), 'r');
+        return self::getBTime($filepath, $return_format);
+    }
+
+    /**
+     * Get the CTime date from the file
+     * @var $filepath
+     * @var $return_format
+     */
+    public static function getFileCTimeDate(string $filepath, string $return_format): ?string
+    {
+        $ctime = filectime($filepath);
+        return date($return_format, $ctime);
+    }
+
+    /**
+     * Get the MTime date from the file
+     * @var $filepath
+     * @var $return_format
+     */
+    public static function getFileMTimeDate(string $filepath, string $return_format): ?string
+    {
+        $mtime = filemtime($filepath);
+        return date($return_format, $mtime);
+    }
+
+    /**
+     * Get the BTime time from the file
+     * @var $filepath
+     * @var $return_format
+     */
+    public static function getFileBTimeTime(string $filepath, string $return_format): ?string
+    {
+        return self::getBTime($filepath, $return_format);
+    }
+
+    /**
+     * Get the BTime from the file in any format desired
+     * @var $filepath
+     * @var $return_format
+     */
+    protected static function getBTime(string $filepath, string $return_format)
+    {
+        $handle = popen('stat -f %B ' . escapeshellarg($filepath), 'r');
         if (!$handle) {
             return null;
         }
 
         $btime = trim(fread($handle, 100));
-        $date_string = date($format, $btime);
+        $date_string = date($return_format, $btime);
         pclose($handle);
 
         return $date_string;
     }
 
-    public static function getFileCTimeDate(string $file, string $format = 'Y-m-d'): ?string
+    /**
+     * Get the CTime time from the file
+     * @var $filepath
+     * @var $return_format
+     */
+    public static function getFileCTimeTime(string $filepath, string $return_format): ?string
     {
-        $ctime = filectime($file);
-        return date($format, $ctime);
+        $ctime = filectime($filepath);
+        return date($return_format, $ctime);
     }
-
-    public static function getFileMTimeDate(string $file, string $format = 'Y-m-d'): ?string
-    {
-        $mtime = filemtime($file);
-        return date($format, $mtime);
-    }
-
-    public static function getFileBTimeTime(string $file, string $format = 'H;i;s'): ?string
-    {
-        $handle = popen('stat -f %B ' . escapeshellarg($file), 'r');
-        if (!$handle) {
-            return null;
-        }
-
-        $btime = trim(fread($handle, 100));
-        $time_string = date($format, $btime);
-        pclose($handle);
-
-        return $time_string;
-    }
-
-    public static function getFileCTimeTime(string $file, string $format = 'H;i;s'): ?string
-    {
-        $ctime = filectime($file);
-        return date($format, $ctime);
-    }
-
-    public static function getFileMTimeTime(string $file, string $format = 'H;i;s'): ?string
-    {
-        $mtime = filemtime($file);
-        return date($format, $mtime);
-    }
-
 
     /**
+     * Get the MTime time from the file
+     * @var $filepath
+     * @var $return_format
+     */
+    public static function getFileMTimeTime(string $filepath, string $return_format): ?string
+    {
+        $mtime = filemtime($filepath);
+        return date($return_format, $mtime);
+    }
+
+    /**
+     * Scandir Filtered
      * @var $dir directory to scan
      * @var $ignore_hidden wheater ignore the .asdf files or not
      */
@@ -218,7 +376,10 @@ class FileManagement
         return $result_list;
     }
 
-
+    /**
+     * Scandir Tree
+     * @var $dir directory to scan
+     */
     public static function scandirTree(string $dir = null): array
     {
         $list = [];
@@ -243,6 +404,10 @@ class FileManagement
         return $result_list;
     }
 
+    /**
+     * Trim First Dot
+     * @var $string string to be trimmmed
+     */
     public static function trimFirstDot(string $string): string
     {
         if ($string[0] === '.' && $string[1] === '/') {

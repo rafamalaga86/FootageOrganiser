@@ -46,14 +46,14 @@ class DateTitleSetter
                 continue;
             }
 
-            // We have to filter out the ones with title already in the name
-            if (FileManagement::hasAtLeastOneCreationDateFromTitleYYYYMMDD($file)) {
+            // We have to filter out the ones with date and time already in the title
+            if (FileManagement::hasAtLeastOneDateInTitle($file)) {
                 continue;
             }
 
             try {
                 list($creation_date, $data_source_date) = FileManagement::getFileCreationDate($file);
-                $creation_time = FileManagement::getFileCreationTime($file);
+                list($creation_time, $data_source_time) = FileManagement::getFileCreationTime($file, 'H;i;s');
             } catch (Exception $exception) {
                 throw new Exit1Exception($exception->getMessage());
             }

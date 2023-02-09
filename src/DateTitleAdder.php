@@ -10,7 +10,7 @@ class DateTitleAdder
 {
     protected static $files_without_date = [];
 
-    protected static $files_without_time = [];
+    protected static $files_without_one_time = [];
 
     public static function run(array $argv): void
     {
@@ -39,14 +39,13 @@ class DateTitleAdder
             throw new Exit1Exception('Could not change dir.');
         }
 
+        // If null, we will be changing the format only
         $carbon_modifier = $argv[1] ?? null;
-
-        if (!$carbon_modifier) {
-            throw new Exit1Exception('The carbon modifier argument is missing.');
-        }
         try {
-            $test = (new Carbon())->add($carbon_modifier);
-        } catch(TypeError $error) {
+            if ($carbon_modifier) {
+                (new Carbon())->add($carbon_modifier);
+            }
+        } catch (TypeError $error) {
             throw new Exit1Exception($carbon_modifier . ': There is something wrong with the carbon modifier you entered.');
         }
 
@@ -62,14 +61,24 @@ class DateTitleAdder
             }
 
             // We have to filter out the ones without date in the title
-            if (!FileManagement::hasOneCreationDateFromTitleYYYYMMDD($file)) {
+            if (!FileManagement::hasAtLeastOneDateInTitle($file)) {
                 self::$files_without_date[] = $file;
                 $quit = true;
             }
 
             // We have to filter out the ones without time in the title
-            if (!FileManagement::hasOneCreationTimeFromTitleHHMMSS($file)) {
-                self::$files_without_time[] = $file;
+            if (!FileManagement::hasExactlyOneTimeInTitle($file)) {
+                self::$files_without_one_time[] = $file;
+                $quit = true;
+            }
+
+            // Check if this file has date and time in proper formats already and
+            // we dont need to add or substract anything
+            if (
+                FileManagement::hasExactlyOneTitleDashedIsoDate($file)
+                && FileManagement::hasExactlyOneTimeWithSemicolonInTitle($file)
+                && !$carbon_modifier
+            ) {
                 $quit = true;
             }
 
@@ -79,16 +88,19 @@ class DateTitleAdder
 
             // START
             try {
-                $old_creation_date = FileManagement::getCreationDateFromTitleYYYYMMDD($filename, false);
-                $old_creation_time = FileManagement::getCreationTimeFromTitleHHMMSS($filename, false);
-                $old_creation_date_formatted = FileManagement::getCreationDateFromTitleYYYYMMDD($filename);
-                $old_creation_time_formatted = FileManagement::getCreationTimeFromTitleHHMMSS($filename);
+                $old_creation_date = FileManagement::getDateFromTitle($filename);
+                $old_creation_time = FileManagement::getTimeFromTitle($filename);
+                $old_creation_date_formatted = FileManagement::getDateFromTitle($filename, 'Y-m-d');
+                $old_creation_time_formatted = FileManagement::getTimeFromTitle($filename, 'H:i:s');
             } catch (Exception $exception) {
                 throw new Exit1Exception($exception->getMessage());
             }
 
             $carbon = new Carbon($old_creation_date_formatted . 'T' . $old_creation_time_formatted);
-            $carbon->add($carbon_modifier);
+
+            if ($carbon_modifier) {
+                $carbon->add($carbon_modifier);
+            }
 
             $new_name = str_replace($old_creation_date, $carbon->format('Y-m-d'), $filename);
             $new_name = str_replace($old_creation_time, $carbon->format('H;i;s'), $new_name);
@@ -98,24 +110,21 @@ class DateTitleAdder
             echo $file . ' -> ';
             CommandLine::printGreen($new_name . PHP_EOL);
         }
-
-        if (!$filtered_list) {
-            CommandLine::printGreen('There is no files to be renamed.' . PHP_EOL);
-            return;
-        }
-
-        echo PHP_EOL;
         if (self::$files_without_date) {
-            echo 'One or more files didn\'t have ';
+            echo PHP_EOL . 'One or more files didn\'t have exactly one ';
             CommandLine::printYellow('date: ' . PHP_EOL);
             CommandLine::printList(self::$files_without_date);
         }
 
-        echo PHP_EOL;
-        if (self::$files_without_time) {
-            echo 'One or more files didn\'t have ';
+        if (self::$files_without_one_time) {
+            echo PHP_EOL . 'One or more files didn\'t have exactly one ';
             CommandLine::printYellow('time: ' . PHP_EOL);
-            CommandLine::printList(self::$files_without_time);
+            CommandLine::printList(self::$files_without_one_time);
+        }
+
+        if (!$filtered_list) {
+            CommandLine::printGreen(PHP_EOL . 'There are no valid files to be renamed.' . PHP_EOL);
+            return;
         }
 
         CommandLine::confirmOrAbort();
