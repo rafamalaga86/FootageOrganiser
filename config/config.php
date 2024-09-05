@@ -65,14 +65,21 @@ function sourceAliasPaths()
         'GoPro9' => '/Volumes/GoPro9/DCIM',
         'GoPro11' => '/Volumes/GoPro11/DCIM',
         'OneX2' => '/Volumes/OneX2/DCIM',
+        'Extra' => '/Volumes/Extra/DCIM',
         'GO2' => '/Volumes/Insta360GO2/DCIM',
+        '00' => '/Volumes/Extreme SSD/00 To Organise',
     ];
 }
 
 function destinyAliasPaths()
 {
     return [
-        'new' => '/Volumes/Extreme SSD/Video Workspace/Footage/new',
+        'newSSD' => '/Volumes/Extreme SSD/Video Workspace/Footage/newSSD',
+        'newCie' => '/Volumes/LaCie2/Video Workspace/Footage/newCie',
+        'LaCie2' => '/Volumes/LaCie2/El Salvador/',
         'USA' => '/Volumes/Extreme SSD/Video Workspace/Footage/USA',
+        'mexico' => '/Volumes/LaCie2/Mexico/',
+        'centroamerica' => '/Volumes/Extreme SSD/Video Workspace/Footage/CentroAmerica2',
+        'sudamerica' => '/Volumes/Extreme SSD/Video Workspace/Footage/Sudamérica/'
     ];
 }

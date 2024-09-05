@@ -6,7 +6,6 @@ use FootageOrganiser\CommandLine;
 use FootageOrganiser\Exit1Exception;
 use FootageOrganiser\FootageOrganiser;
 
-
 try {
     FootageOrganiser::run($argv);
 } catch (Exit1Exception $exception) {

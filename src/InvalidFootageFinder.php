@@ -4,7 +4,7 @@ namespace FootageOrganiser;
 
 class InvalidFootageFinder
 {
-    public static function run (array $argv)
+    public static function run(array $argv)
     {
         echo 'INVALID FOOTAGE FINDER' . PHP_EOL;
         echo '======================' . PHP_EOL;
