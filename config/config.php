@@ -55,7 +55,7 @@ function validCamerasAndPaths()
 {
     return [
         'GoPro9' => '/Volumes/GoPro9/DCIM/',
-        'GoPro11' => '/Volumes/GoPro11/DCIM/',
+        'GoPro12' => '/Volumes/GoPro12/DCIM/',
     ];
 }
 
@@ -64,7 +64,11 @@ function sourceAliasPaths()
     return [
         'GoPro9' => '/Volumes/GoPro9/DCIM',
         'GoPro11' => '/Volumes/GoPro11/DCIM',
-        'OneX2' => '/Volumes/OneX2/DCIM',
+        'GoPro12' => '/Volumes/GoPro12/DCIM',
+        'OneX3' => '/Volumes/OneX3/DCIM',
+        'OneX3-2' => '/Volumes/OneX3-2/DCIM',
+        'OneX3Export' => '/Volumes/OneX3/export',
+        'OneX3-2Export' => '/Volumes/OneX3-2/export',
         'Extra' => '/Volumes/Extra/DCIM',
         'GO2' => '/Volumes/Insta360GO2/DCIM',
         '00' => '/Volumes/Extreme SSD/00 To Organise',
@@ -80,6 +84,8 @@ function destinyAliasPaths()
         'USA' => '/Volumes/Extreme SSD/Video Workspace/Footage/USA',
         'mexico' => '/Volumes/LaCie2/Mexico/',
         'centroamerica' => '/Volumes/Extreme SSD/Video Workspace/Footage/CentroAmerica2',
-        'sudamerica' => '/Volumes/Extreme SSD/Video Workspace/Footage/Sudamérica/'
+        'colombia' => '/Volumes/Extreme SSD/Video Workspace/Footage/Colombia/',
+        'ecuador' => '/Volumes/Extreme SSD/Video Workspace/Footage/Ecuador/',
+        'peru' => '/Volumes/Extreme SSD/Video Workspace/Footage/Peru/',
     ];
 }
