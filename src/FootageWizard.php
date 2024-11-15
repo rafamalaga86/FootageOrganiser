@@ -14,10 +14,10 @@ class FootageWizard
         $carbon_modifier = $argv[3] ?? null;
 
         if (!$source) {
-            throw new Exit1Exception('The directory argument is missing.');
+            throw new Exit1Exception('The source directory argument is missing.');
         }
         if (!$destiny) {
-            throw new Exit1Exception('The directory argument is missing.');
+            throw new Exit1Exception('The destiny directory argument is missing.');
         }
 
         list($source, $destiny) = self::getPathsFromAlias($source, $destiny);
