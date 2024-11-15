@@ -13,16 +13,6 @@ class InvalidFootageFinder
         unset($argv[0]);
         $argv = array_values($argv);
 
-        // // For option --test
-        // $is_test = false;
-        // $option_position = array_search('--test', $argv);
-        // if ($option_position) {
-        //     $is_test = true;
-
-        //     unset($argv[$option_position]);
-        //     $argv = array_values($argv);
-        // }
-
         $dir = $argv[0] ?? null;
 
         if (!$dir) {
