@@ -15,40 +15,40 @@ class FootageOrganiser
         unset($argv[0]);
         $argv = array_values($argv);
 
-        $organise_dir = $argv[0] ?? null;
-        $main_dir = $argv[1] ?? null;
+        $source_dir = $argv[0] ?? null;
+        $destiny_dir = $argv[1] ?? null;
 
-        if (!$main_dir) {
-            throw new Exit1Exception('The main directory argument is missing.');
+        if (!$source_dir) {
+            throw new Exit1Exception('The source directory argument is missing.');
         }
 
-        if (!$organise_dir) {
-            throw new Exit1Exception('The organise directory argument is missing.');
+        if (!$destiny_dir) {
+            throw new Exit1Exception('The destiny directory argument is missing.');
         }
 
-        $main_dir = realpath($main_dir);
-        $organise_dir = realpath($organise_dir);
+        $destiny_dir = realpath($destiny_dir);
+        $source_dir = realpath($source_dir);
 
-        if (!is_dir($main_dir)) {
-            throw new Exit1Exception('Could not locate the main directory argument.');
+        if (!is_dir($destiny_dir)) {
+            throw new Exit1Exception('Could not locate the destiny directory argument.');
         }
 
-        if (!is_dir($organise_dir)) {
-            throw new Exit1Exception('Could not locate the organise directory argument.');
+        if (!is_dir($source_dir)) {
+            throw new Exit1Exception('Could not locate the source directory argument.');
         }
 
-        $could_change_dir = chdir($organise_dir);
+        $could_change_dir = chdir($source_dir);
 
         if (!$could_change_dir) {
-            CommandLine::printRed('Could not change dir to the organise dir.' . PHP_EOL);
+            CommandLine::printRed('Could not change dir to the source dir.' . PHP_EOL);
         }
 
         $file_list = FileManagement::scandirTree('.');
-        $replacements = self::getReplacements($file_list, $organise_dir);
-        self::organise($file_list, $main_dir, $replacements);
+        $replacements = self::getReplacements($file_list, $source_dir);
+        self::organise($file_list, $destiny_dir, $replacements);
     }
 
-    protected static function getReplacements(array $file_list, string $organise_dir): array
+    protected static function getReplacements(array $file_list, string $source_dir): array
     {
         $replacements = [];
         foreach ($file_list as $file) {
@@ -160,6 +160,9 @@ class FootageOrganiser
 
 
         echo PHP_EOL;
+        sort($dir_existing);
+        sort($dir_created);
+
         if ($dir_existing) {
             echo 'Existing dirs: ' . implode(', ', $dir_existing) . PHP_EOL;
         }
