@@ -34,7 +34,7 @@ function routeReplacement()
 {
     return  [
         '/^.*\/OneX2\/DCIM\/Camera01\/.*$/' => ['Camera01', 'OneX2'],
-        '/^.*\/Insta360GO2\/DCIM\/Camera01\/.*$/' => ['Camera01', 'Go2-NotRendered'],
+        '/^.*\/Insta360GO2\/DCIM\/Camera01\/.*$/' => ['Camera01', 'GO2NotRendered'],
         '/^.*\/GoPro9\/DCIM\/100GOPRO\/.*$/' => ['100GOPRO', 'GoPro9'],
         '/^.*\/GoPro11\/DCIM\/100GOPRO\/.*$/' => ['100GOPRO', 'GoPro11'],
         '/^.*\/GoPro12\/DCIM\/100GOPRO\/.*$/' => ['100GOPRO', 'GoPro12'],
@@ -88,5 +88,24 @@ function destinyAliasPaths()
         'colombia' => '/Volumes/Extreme SSD/Video Workspace/Footage/Colombia/',
         'ecuador' => '/Volumes/Extreme SSD/Video Workspace/Footage/Ecuador/',
         'peru' => '/Volumes/Extreme SSD/Video Workspace/Footage/Peru/',
+    ];
+}
+
+
+function validDirNames()
+{
+    return [
+        'GoPro12',
+        'GoPro11',
+        'GoPro9',
+        'GO2',
+        'GO2NotRendered',
+        'Mobile',
+        'OneX2',
+        'OneX3',
+        'OneX3Rendered',
+        'OneX2Rendered',
+        'TourCamera',
+        'GoogleEarth',
     ];
 }

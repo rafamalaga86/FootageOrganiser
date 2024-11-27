@@ -19,7 +19,7 @@ class CommandLine
         echo "\e[0;31m" . $string . "\e[0m";
     }
 
-    public static function printList(array $array): void
+    public static function printList(array $array, bool $withReturns = false ): void
     {
         foreach ($array as $key => $item) {
             if (!is_array($item)) {
@@ -27,6 +27,9 @@ class CommandLine
                     echo ucfirst($key) . ': ';
                 }
                 echo $item . '  ';
+                if ($withReturns) {
+                    echo PHP_EOL;
+                }
             } elseif (is_array($item)) {
                 self::printList($item);
             }
