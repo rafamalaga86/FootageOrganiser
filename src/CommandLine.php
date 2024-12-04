@@ -4,6 +4,11 @@ namespace FootageOrganiser;
 
 class CommandLine
 {
+    public static function print(string $string): void
+    {
+        echo $string;
+    }
+
     public static function printYellow(string $string): void
     {
         echo "\e[0;33m" . $string . "\e[0m";

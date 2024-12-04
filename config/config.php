@@ -79,15 +79,8 @@ function sourceAliasPaths()
 function destinyAliasPaths()
 {
     return [
-        'newSSD' => '/Volumes/Extreme SSD/Video Workspace/Footage/newSSD',
-        'newCie' => '/Volumes/LaCie2/Video Workspace/Footage/newCie',
-        'LaCie2' => '/Volumes/LaCie2/El Salvador/',
-        'USA' => '/Volumes/Extreme SSD/Video Workspace/Footage/USA',
-        'mexico' => '/Volumes/LaCie2/Mexico/',
-        'centroamerica' => '/Volumes/Extreme SSD/Video Workspace/Footage/CentroAmerica2',
-        'colombia' => '/Volumes/Extreme SSD/Video Workspace/Footage/Colombia/',
-        'ecuador' => '/Volumes/Extreme SSD/Video Workspace/Footage/Ecuador/',
-        'peru' => '/Volumes/Extreme SSD/Video Workspace/Footage/Peru/',
+        'LaCie2-Peru' => '/Volumes/LaCie2/Peru/',
+        'SSD-Peru' => '/Volumes/Extreme SSD/Peru/',
     ];
 }
 

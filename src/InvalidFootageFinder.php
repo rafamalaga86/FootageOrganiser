@@ -19,6 +19,7 @@ class InvalidFootageFinder
             throw new Exit1Exception('The directory argument is missing.');
         }
 
+        $dir = destinyAliasPaths()[$dir] ?? $dir;
         $dir = realpath($dir);
 
         if (!is_dir($dir)) {

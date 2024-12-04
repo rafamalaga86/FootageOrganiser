@@ -210,6 +210,9 @@ class FootageOrganiser
         echo PHP_EOL . $count . ' of ' . count($file_moving_list) . ' files copied.' . PHP_EOL;
         if (!$fails) {
             CommandLine::printGreen('SCRIPT ENDED SUCCESSFULLY' . PHP_EOL);
+            if (!$dir_created) {
+                CommandLine::printGreen('REMEMBER TO NAME THE NEW DIRECTORIES' . PHP_EOL);
+            }
         } else {
             CommandLine::printRed('SCRIPT ENDED WITH SOME COPY FAILS' . PHP_EOL);
             CommandLine::printList($fails);
@@ -217,6 +220,27 @@ class FootageOrganiser
     }
 
     protected static function printProgression(int $percentage, string $camera = null)
+    {
+        $bar_size = 30;
+        $percentage30 = round($percentage / 100 * $bar_size);
+
+        // The strpad with the character selected works weird. It needs a correction
+        $max_bar_correction =  $bar_size * 3;
+
+        $draw_percentage =  str_pad($percentage . '%', 4, ' ', STR_PAD_LEFT);
+
+        $completed_bar = str_repeat('▒', $percentage30);
+        $bar = str_pad($completed_bar, $max_bar_correction, '░', STR_PAD_RIGHT);
+        CommandLine::printGreen($draw_percentage);
+        echo ' ';
+        echo $bar;
+        echo ' ';
+        CommandLine::printGreen($camera);
+
+        return strlen($draw_percentage . $bar . $camera);
+    }
+
+    protected static function oldPrintProgression(int $percentage, string $camera = null)
     {
         $percentage29 = round($percentage / 100 * 29);
         // '|===================>          | 72%';
