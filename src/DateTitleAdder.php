@@ -6,6 +6,11 @@ use Carbon\Carbon;
 use Exception;
 use TypeError;
 
+/**
+* This script does two things.
+* 1. If the date is in the title, but not in the proper format, it changes to the proper format
+* 2. If is provided a Carbon DateTime Modifier, then changes the time with the modifier
+*/
 class DateTitleAdder
 {
     protected static $files_without_date = [];
@@ -41,6 +46,10 @@ class DateTitleAdder
 
         // If null, we will be changing the format only
         $carbon_modifier = $argv[1] ?? null;
+        if (!$carbon_modifier) {
+            CommandLine::printYellow('No carbon modifier provided as second argument: only changing date format.');
+            echo PHP_EOL;
+        }
         try {
             if ($carbon_modifier) {
                 (new Carbon())->add($carbon_modifier);

@@ -4,12 +4,20 @@
 function min_sizes()
 {
     return [
-        'mp4' => 5,
+        'mp4' => 20,
         'jpg' => 1,
+        'jpeg' => 1,
+        'heic' => 1,
         'wav' => 2,
         'insp' => 2,
+        'insv' => 40,
         'default' => 5,
     ];
+}
+
+function min_sizes_exceptions()
+{
+    return ['/Mobile/'];
 }
 
 function exceptions(): array
@@ -79,8 +87,10 @@ function sourceAliasPaths()
 function destinyAliasPaths()
 {
     return [
-        'LaCie2-Peru' => '/Volumes/LaCie2/Peru/',
-        'SSD-Peru' => '/Volumes/Extreme SSD/Peru/',
+        'Peru-LaCie2' => '/Volumes/LaCie2/Peru/',
+        'Peru-2TB' => '/Volumes/2TB/Peru/',
+        'Peru-MyPassport2' => '/Volumes/MyPassport2/Peru/',
+        'Peru-SSD' => '/Volumes/Extreme SSD/Peru/',
     ];
 }
 

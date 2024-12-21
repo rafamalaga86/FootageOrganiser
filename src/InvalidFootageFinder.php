@@ -51,6 +51,12 @@ class InvalidFootageFinder
         $list_filtered = array_filter($file_list_size, function ($item) {
             $extension = FileManagement::getFileExtension($item['file']);
             $min_size = min_sizes()[$extension] ?? min_sizes()['default'];
+            
+            foreach (min_sizes_exceptions() as $substr) {
+                if (str_contains($item['file'], $substr)) {
+                    return false;
+                }
+            }
             if ($item['size'] < 1024 * 1024 * $min_size) {// 1 MB
                 return true;
             }

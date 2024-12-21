@@ -235,7 +235,9 @@ class FootageOrganiser
         echo ' ';
         echo $bar;
         echo ' ';
-        CommandLine::printGreen($camera);
+        if ($camera) {
+            CommandLine::printGreen($camera);
+        }
 
         return strlen($draw_percentage . $bar . $camera);
     }
