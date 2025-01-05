@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Define color codes
+GREEN='\033[0;32m'
+NC='\033[0m' # No color
+
+# Check if an argument was provided
+if [ -z "$1" ]; then
+  echo "Usage: $0 <directory>"
+  exit 1
+fi
+
+# Set the directory to the argument
+TARGET_DIR=$1
+
+# Check if the directory exists
+if [ ! -d "$TARGET_DIR" ]; then
+  echo "Error: Directory '$TARGET_DIR' does not exist."
+  exit 1
+fi
+
+# Change to the target directory
+cd "$TARGET_DIR" || exit
+
+# Run the invalid_name_finder.php script
+php ~/htdocs/footageOrganiser/invalid_name_finder.php .
+echo ""
+
+# Run the invalid_footage_finder.php script
+php ~/htdocs/footageOrganiser/invalid_footage_finder.php .
+echo ""
+
+echo "GoPro Files that are sequential and with wrong naming..."
+echo "======================"
+# find . -type f -regex '.*GX0[^1][0-9]*.MP4'
+GOPRO_SEQUENTIAL=$(find . -type f -regex '.*GX0[^1][0-9]*.MP4')
+
+if [ -n "$GOPRO_SEQUENTIAL" ]; then
+  echo "$GOPRO_SEQUENTIAL"
+else
+  echo -e "${GREEN}No GoPro sequential files with wrong name${NC}"
+fi
+echo ""
+
+echo "OneX3 Rendered files out of their directories..."
+echo "======================"
+ONEX3_WRONG_PLACE=$(find . -type f -regex '.*/[0-9]\{8\}_[0-9]\{6\}_[0-9]\{3\}\.mp4' ! -path '*/OneX3Rendered/*' ! -path '*/OneX2Rendered/*')
+if  [ -n "$ONEX3_WRONG_PLACE" ]; then
+  echo "$ONEX3_WRONG_PLACE"
+else
+  echo -e "${GREEN}No OneX3Rendered files out of their dirs${NC}"
+fi
+
+echo ""
+echo "Deleting .DS_Store files and empty directories..."
+find . -iname .DS_Store -delete ; find . -type d -empty -delete
