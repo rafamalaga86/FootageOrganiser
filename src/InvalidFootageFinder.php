@@ -72,8 +72,5 @@ class InvalidFootageFinder
             CommandLine::printGreen(number_format($item['size'] / 1024 / 1024, 2));
             echo ' MB' . PHP_EOL;
         }
-
-        echo PHP_EOL;
-        CommandLine::printGreen('SCRIPT ENDED SUCCESSFULLY' . PHP_EOL);
     }
 }
